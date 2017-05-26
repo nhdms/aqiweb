@@ -1,0 +1,26 @@
+<section ng-controller="DashboardController" class="chartist">
+  <div class="row">
+    <div class="col-xs-6 col-sm-4">
+      <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLocation">
+      </select>
+    </div>
+    <div class="col-xs-6 col-sm-4">
+      <div class="form-group">
+        <select class="form-control">
+          <option ng-repeat="node in nodes track by $index" value="{{node.id}}" ng-if="node.loc == currentLocation.id">
+            {{node.name}}
+          </option>
+      </select>
+      </div>
+    </div>
+    <div class="clearfix visible-xs-block"></div>
+    <div class="col-xs-6 col-sm-4">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ THEO TỪNG GIỜ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+      <div id="zoomAxisChart" class="admin-chart"></div>
+    </div>
+  </div>
+</section>
