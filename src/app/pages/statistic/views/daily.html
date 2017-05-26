@@ -1,1 +1,87 @@
-<h1>asdf</h1>
+<div class="widgets">
+   <div class="datepicker row">
+      <form>
+         <div class="col-xlg-2 col-md-4 col-sm-2">
+            <div class="input-group">
+               <input type="text" class="form-control" uib-datepicker-popup="{{format}}" datepicker-options="options" ng-model="dt" is-open="opened"
+                  ng-required="true" close-text="Close" alt-input-formats="altInputFormats" show-button-bar="false" />
+               <span class="input-group-btn">
+               <button type="button" class="btn btn-default" ng-click="open()"><i class="glyphicon glyphicon-calendar"></i></button>
+               </span>
+            </div>
+         </div>
+         <div class="col-xlg-2 col-md-4 col-sm-2">
+            <div class="input-group">
+               <input type="text" class="form-control" uib-datepicker-popup="{{format}}" datepicker-options="options" ng-model="dt2" is-open="opened2"
+                  ng-required="true" close-text="Close" alt-input-formats="altInputFormats" show-button-bar="false" />
+               <span class="input-group-btn">
+               <button type="button" class="btn btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+               </span>
+            </div>
+         </div>
+         <div class="col-xlg-2 col-md-4 col-sm-2">
+            <select class="form-control" ng-options="node as node.name for node in nodes track by node.id" ng-model="currentNode">
+            </select>
+         </div>
+         <div class="col-xlg-2 col-md-4 col-sm-2">
+            <select class="form-control">
+               <option ng-repeat="sensor in sensors track by $index" value="{{sensor.id}}" ng-if="sensor.node == currentNode.id">
+                  {{sensor.name}}
+               </option>
+            </select>
+         </div>
+         <div class="col-xlg-1 col-md-2 col-sm-1">
+             <button type="button" class="btn btn-info btn-icon"><i class="ion-stats-bars"></i></button>
+         </div>
+      </form>
+   </div>
+   <div class="row">
+      <div class="col-lg-10 col-md-20">
+         <div ba-panel ba-panel-title="" ba-panel-class="with-scroll table-panel">
+            <div class="horizontal-scroll">
+               <table class="table table-hover table-striped">
+                  <thead>
+                     <tr>
+                        <th>STT</th>
+                        <th class="align-right">Thời gian đo</th>
+                        <!--<th class="table-arr"></th>-->
+                        <th class="align-right">Thời gian upload</th>
+                        <!--<th class="table-arr"></th>-->
+                        <th class="align-right">Giá trị Đơn vị</th>
+                        <!--<th class="table-arr"></th>-->
+                        <th class="align-right">Sensor</th>
+                        <!--<th class="table-arr"></th>-->
+                        <th class="align-right">Node</th>
+                        <!--<th class="table-arr"></th>-->
+                        <th class="browser-icons">Trạng thái</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr ng-repeat="item in items track by $index" class="no-top-border">
+                        <td ng-class="nowrap">{{$index + 1}}</td>
+                        <td class="align-right">{{item.timeExec}}</td>
+                        <!--<td class="table-arr"><i ng-class="{'icon-up': item.isVisitsUp, 'icon-down': !item.isVisitsUp }"></i></td>-->
+                        <td class="align-right">{{item.timeUpload}}</td>
+                        <td class="align-right">{{item.value}}</td>
+                        <!--<td class="table-arr"><i ng-class="{'icon-up': item.isPurchasesUp, 'icon-down': !item.isPurchasesUp }"></i></td>-->
+                        <td class="align-right">{{item.unit}}</td>
+                        <td class="align-right">{{item.node.name}}</td>
+                        <td><img ng-src="{{::( item.status | appImage )}}" width="20" height="20"></td>
+                        <!--<td class="table-arr"><i ng-class="{'icon-up': item.isPercentUp, 'icon-down': !item.isPercentUp }"></i></td>-->
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <!--<a ng-repeat="page in pages track by $index"> {{$index}} </a>-->
+      <div class="col-md-6 col-md-offset-3">
+         <div class="btn-group center" role="group" aria-label="First group">
+            <button type="button" ng-repeat="page in pages track by $index" class="btn {{$index == currentPage ? 'btn-primary' : 'btn-info'}}"
+               ng-click="getInfo($index)"> {{$index}} </button>
+         </div>
+      </div>
+   </div>
+</div>
