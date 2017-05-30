@@ -1,7 +1,7 @@
-<div class="widgets">
+<div class="widgets" harm-directive>
    <div class="datepicker row">
       <form>
-         <div class="col-xlg-2 col-md-4 col-sm-2">
+         <div class="col-xlg-1 col-md-2 col-sm-1">
             <div class="input-group">
                <input type="text" class="form-control" uib-datepicker-popup="{{format}}" datepicker-options="options" ng-model="dt" is-open="opened"
                   ng-required="true" close-text="Close" alt-input-formats="altInputFormats" show-button-bar="false" />
@@ -10,7 +10,7 @@
                </span>
             </div>
          </div>
-         <div class="col-xlg-2 col-md-4 col-sm-2">
+         <div class="col-xlg-1 col-md-2 col-sm-1">
             <div class="input-group">
                <input type="text" class="form-control" uib-datepicker-popup="{{format}}" datepicker-options="options" ng-model="dt2" is-open="opened2"
                   ng-required="true" close-text="Close" alt-input-formats="altInputFormats" show-button-bar="false" />
@@ -19,11 +19,11 @@
                </span>
             </div>
          </div>
-         <div class="col-xlg-2 col-md-4 col-sm-2">
+         <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" ng-options="node as node.name for node in nodes track by node.id" ng-model="currentNode">
             </select>
          </div>
-         <div class="col-xlg-2 col-md-4 col-sm-2">
+         <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control">
                <option ng-repeat="sensor in sensors track by $index" value="{{sensor.id}}" ng-if="sensor.node == currentNode.id">
                   {{sensor.name}}
@@ -57,7 +57,7 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr ng-repeat="item in items track by $index" class="no-top-border">
+                     <tr ng-repeat="item in items track by $index" class="no-top-border danger">
                         <td ng-class="nowrap">{{$index + 1}}</td>
                         <td class="align-right">{{item.timeExec}}</td>
                         <!--<td class="table-arr"><i ng-class="{'icon-up': item.isVisitsUp, 'icon-down': !item.isVisitsUp }"></i></td>-->
@@ -80,7 +80,7 @@
       <div class="col-md-6 col-md-offset-3">
          <div class="btn-group center" role="group" aria-label="First group">
             <button type="button" ng-repeat="page in pages track by $index" class="btn {{$index == currentPage ? 'btn-primary' : 'btn-info'}}"
-               ng-click="getInfo($index)"> {{$index}} </button>
+               ng-click="getInfo($index)"> {{$index + 1}} </button>
          </div>
       </div>
    </div>
