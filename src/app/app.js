@@ -16,6 +16,7 @@ angular.module('BlurAdmin', [
   'BlurAdmin.theme',
   'BlurAdmin.pages'
 ]).config(function ($translateProvider) {
+  
 
   $translateProvider.useStaticFilesLoader({
     prefix: 'languages/',
@@ -30,4 +31,6 @@ angular.module('BlurAdmin', [
   $translateProvider.uniformLanguageTag('bcp47');
   // $translateProvider.fallbackLanguage('vi');
   $translateProvider.preferredLanguage('vi');
-});
+})
+  .value('SocketURL', 'http://52.77.255.219')
+  .value('APIURL', 'http://localhost:8081');

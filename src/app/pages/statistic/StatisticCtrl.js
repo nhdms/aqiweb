@@ -5,232 +5,193 @@
 (function () {
     'use strict';
 
-    var app = angular.module('BlurAdmin.pages.statistic')
+    var app = angular.module('BlurAdmin.pages.statistics')
         .controller('StatisticCtrl', StatisticCtrl);
 
     /** @ngInject */
-    function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout) {
+    function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, $rootScope, API) {
         $scope.getInfo = function (page) {
 
         }
 
-        // DatePicker
-        $scope.dt = new Date();
-        $scope.dt2 = new Date();
+        $scope.btnStatistic = function (type) {
+            // console.log();
+            //    console.log($scope.datePicker.dt.setHours(0,0,0,0), $scope.currentNode); 
+            var obj = {
+                nodeId: document.getElementById('select_node').value,
+                date: $scope.datePicker.dt.getTime()
+            }
+            // var hum = obj, aqi = obj, temp = 
+            // console.log(Utils.generateChartData(0,3));
 
-        $scope.open = open;
-        $scope.opened = false;
-        $scope.format = 'dd/MM/yyyy';
-        $scope.options = {
-            showWeeks: false,
-        };
+            API.getData(obj, 3, function (response) {
+                // if (response.data.success) 
+                var range = Utils.getSafeRange(3);
+                var values = response.map(function (item) {
+                    item.ok1 = range[0];
+                    item.date = new Date(new Date(item.date).setHours(item._id));
+                    // item.date = new Date(item.date)
+                    item.ok2 = range[1];
+                    return item;
+                });
+                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getHumChartOptions(values)));
 
-        function open() {
-            console.log($scope.opened);
-            $scope.dt = new Date();
-            $scope.opened = !$scope.opened;
+            });
+
+            API.getData(obj, 1, function (response) {
+                // console.log(response)
+                // if (response.data.success)
+                var range = Utils.getSafeRange(1);
+                var values = response.map(function (item) {
+                    item.ok1 = range[0];
+                    item.date = new Date(new Date(item.date).setHours(item._id));
+                    item.ok2 = range[1];
+                    return item;
+                });
+                // console.log(values[0], Utils.generateChartData(20,30)[0])
+                // var opts = 
+                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getTempChartOptions(values)));
+
+            });
+
+            API.getData(obj, 2, function (response) {
+                // console.log(response)
+                // if (response.data.success)
+                var range = Utils.getSafeRange(2);
+                var values = response.map(function (item) {
+                    item.ok1 = range[0];
+                    item.ok2 = range[1];
+                    item.date = new Date(new Date(item.date).setHours(item._id));
+                    // item.date = new Date(item.date)
+                    return item;
+                });
+                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getAqiChartOptions(values)));
+
+            });
+            //    var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
+            //             var chart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(aqi));
         }
 
-        // Date picker 2
-        $scope.open2 = open2;
-        $scope.opened2 = false;
+        $scope.dailyStatistic = function () {
+            var sensor = document.getElementById('select_sensor');
+            var type = +sensor.options[sensor.selectedIndex].getAttribute('type');
+            // console.log();
+            var obj = {
+                start: $scope.datePicker.dt.getTime(),
+                end: $scope.datePicker.dt2.getTime(),
+                nodeId: document.getElementById('select_node').value,
+                sensorId: sensor.value
+            }
+
+            API.getMonthData(obj, function (data) {
+                // var opts = (1 == type) ? 
+                var range = Utils.getSafeRange(type);
+                data = data.map(function (i) {
+                    i.ok1 = range[0];
+                    i.ok2 = range[1];
+                    i.date = new Date(i._id);
+                    return i;
+                });
+
+                var opts = (1 == type) ? Utils.getTempChartOptions(data) : (2 == type) ? Utils.getAqiChartOptions(data) : Utils.getHumChartOptions(data);
+                opts.dataDateFormat = "YYYY-MM-DD";
+                opts.minPeriod = "DD";
+                AmCharts.makeChart('div-chart', Utils.buildChartOptions(opts));
+
+            });
+            // var opts = (1 == type) ? Utils.getTempChartOptions()
+        }
+
+        $scope.pageLength = 0;
+
+        $scope.tableStatistic = function (page) {
+            console.log(page);
+            $scope.currentPage = page;
+            var sensor = document.getElementById('select_sensor');
+            // console.log();
+            var obj = {
+                start: $scope.datePicker.dt.getTime(),
+                end: $scope.datePicker.dt2.getTime(),
+                nodeId: document.getElementById('select_node').value,
+                sensorId: sensor.value,
+                page: page
+            };
+
+            // $scope.currentPage = obj.page;
+            API.getTableData(obj, function (data, pages) {
+                // console.log(data, pages)
+                $scope.pageLength = pages;
+                data = data.map(function (i) {
+                    i.unit = (1 == i.type ? '°C' : (3 == i.type) ? '%' : '');
+                    var range = Utils.getSafeRange(i.type);
+                    i.status = (i.value < range[0] || i.value > range[1] ? 'app/status/bad.png' : 'app/status/ok.png');
+                    return i;
+                });
+                $scope.items = data;
+                // $scope.pages = createPagesArray(obj.page);
+                // if ($scope.pageLength - $scope.currentPage >= 7) {
+                var start = ($scope.pageLength - $scope.currentPage >= 7 ? $scope.currentPage : $scope.pageLength - 7);
+                var len = $scope.pageLength > 7 ? 7 : $scope.pageLength;
+                $scope.pages = Array(len).fill().map(function (x, i) {
+                    return i + start;
+                });
+                // }
+            })
+        }
+
+        // function getTable
+        // DatePicker
+        $scope.datePicker = {
+            dt: new Date('Fri Sep 09 2016 00:00:00 GMT+0700 (SE Asia Standard Time)'),
+            dt2: new Date(),
+            open: open,
+            open2: open2,
+            opened: false,
+            opened2: false,
+            format: 'dd/MM/yyyy',
+            options: {
+                showWeeks: false
+            },
+
+        }
+
+        function open() {
+            $scope.datePicker.dt = new Date();
+            $scope.datePicker.opened = !$scope.datePicker.opened;
+        }
 
         function open2() {
-            console.log($scope.opened);
-            $scope.dt2 = new Date();
-            $scope.opened2 = !$scope.opened2;
+            $scope.datePicker.dt2 = new Date();
+            $scope.datePicker.opened2 = !$scope.datePicker.opened2;
         }
 
         // Form
-        $scope.nodes = [
-            {
-                id: 'f1',
-                name: 'NODE R1',
-                loc: 'hnptit'
-            },
-            {
-                id: 'f2',
-                name: 'NODE R2',
-                loc: 'hnptit'
-            },
-            {
-                id: 'f3',
-                name: 'NODE R3',
-                loc: 'hnptit'
-            },
-            {
-                id: 'f4',
-                name: 'NODE RdS',
-                loc: 'hnbk'
-            },
-            {
-                id: 'f5',
-                name: 'NODE RXS',
-                loc: 'hnbk'
-            },
-            {
-                id: 'f8',
-                name: 'NODE RTLA',
-                loc: 'hntl'
+        if ($rootScope.nodes) {
+            $scope.nodes = $rootScope.nodes;
+        } else {
+            API.getInfo('nodes', null, function (res) {
+                if (res.success) {
+                    $scope.nodes = res.data;
+                    $scope.currentNode = $scope.nodes[1];
+                    $rootScope.nodes = $scope.nodes;
+                }
+            });
+        }
+
+        API.getInfo('sensors', null, function (res) {
+            // console.log(res)
+            if (res.success) {
+                $scope.sensors = res.data;
+                $scope.currentSensor = $scope.sensors[0];
+                $rootScope.sensors = $scope.sensors;
             }
-        ];
-
-        $scope.sensors = [
-            {
-                id: 's1',
-                name: 'KK1',
-                node: 'f1'
-            },
-            {
-                id: 's2',
-                name: 'DA1',
-                node: 'f1'
-            },
-            {
-                id: 's3',
-                name: 'ND1',
-                node: 'f2'
-            }
-        ];
-
-        // Temperature chart
-        // console.log();
-
-
+        });
     }
 
     app.directive('hourDirective', function (API, $timeout, baConfig, Utils) {
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
-                $timeout(function () {
-                    var layoutColors = baConfig.colors;
-                    var temp = {
-                        dataDateFormat: "JJ:NN:SS",
-                        axis: [
-                            { title: 'Nhiệt độ', position: "left" }
-                        ],
-                        graphs: [{
-                            valueAxis: 'v1',
-                            title: 'Nhiệt độ cao nhất',
-                            valueField: 'max',
-                            lineColor: layoutColors.danger
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Nhiệt độ trung bình',
-                            valueField: 'avg',
-                            lineColor: layoutColors.warning
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Nhiệt độ thấp nhất',
-                            valueField: 'min',
-                            lineColor: layoutColors.info
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn thấp nhất',
-                            valueField: 'ok1',
-                            lineColor: layoutColors.primaryLight
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn cao nhất',
-                            valueField: 'ok2',
-                            lineColor: layoutColors.primary
-                        },
-                        ],
-                        categoryField: "date",
-                        minPeriod: "hh",
-                        dataProvider: Utils.generateChartData(26, 35)
-                    }
-
-                    var hum = {
-                        dataDateFormat: "JJ:NN:SS",
-                        axis: [
-                            { title: 'Độ ẩm', position: "left" }
-                        ],
-                        graphs: [{
-                            valueAxis: 'v1',
-                            title: 'Độ ẩm cao nhất',
-                            valueField: 'max',
-                            lineColor: layoutColors.danger
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Độ ẩm trung bình',
-                            valueField: 'avg',
-                            lineColor: layoutColors.warning
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Độ ẩm thấp nhất',
-                            valueField: 'min',
-                            lineColor: layoutColors.info
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn thấp nhất',
-                            valueField: 'ok1',
-                            lineColor: layoutColors.primaryLight
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn cao nhất',
-                            valueField: 'ok2',
-                            lineColor: layoutColors.primary
-                        },
-                        ],
-                        categoryField: "date",
-                        minPeriod: "hh",
-                        dataProvider: Utils.generateChartData(65, 90)
-                    }
-
-                    var aqi = {
-                        dataDateFormat: "JJ:NN:SS",
-                        axis: [
-                            { title: 'Chỉ số chất lượng không khí aqi', position: "left" }
-                        ],
-                        graphs: [{
-                            valueAxis: 'v1',
-                            title: 'AQI cao nhất',
-                            valueField: 'max',
-                            lineColor: layoutColors.danger
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'AQI trung bình',
-                            valueField: 'avg',
-                            lineColor: layoutColors.warning
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'AQI thấp nhất',
-                            valueField: 'min',
-                            lineColor: layoutColors.info
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn thấp nhất',
-                            valueField: 'ok1',
-                            lineColor: layoutColors.primaryLight
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn cao nhất',
-                            valueField: 'ok2',
-                            lineColor: layoutColors.primary
-                        },
-                        ],
-                        categoryField: "date",
-                        minPeriod: "hh",
-                        dataProvider: Utils.generateChartData(1, 6)
-                    }
-                    var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
-                    var chart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(hum));
-                    var chart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(aqi));
-                }, 0);
             }
         };
     });
@@ -241,51 +202,6 @@
             link: function ($scope, element, attrs) {
                 $scope.opened = false;
                 $scope.opened2 = false;
-                var layoutColors = baConfig.colors;
-                $timeout(function () {
-                    var temp = {
-                        dataDateFormat: "JJ:NN:SS",
-                        axis: [
-                            { title: 'Nhiệt độ', position: "left" }
-                        ],
-                        graphs: [{
-                            valueAxis: 'v1',
-                            title: 'Nhiệt độ cao nhất',
-                            valueField: 'max',
-                            lineColor: layoutColors.danger
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Nhiệt độ trung bình',
-                            valueField: 'avg',
-                            lineColor: layoutColors.warning
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Nhiệt độ thấp nhất',
-                            valueField: 'min',
-                            lineColor: layoutColors.info
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn thấp nhất',
-                            valueField: 'ok1',
-                            lineColor: layoutColors.primaryLight
-                        },
-                        {
-                            valueAxis: 'v1',
-                            title: 'Ngưỡng an toàn cao nhất',
-                            valueField: 'ok2',
-                            lineColor: layoutColors.primary
-                        },
-                        ],
-                        categoryField: "date",
-                        minPeriod: "hh",
-                        dataProvider: Utils.generateChartData(26, 35)
-                    }
-
-                    var chart = AmCharts.makeChart('div-chart', Utils.buildChartOptions(temp));
-                }, 0);
             }
         };
     });
@@ -295,75 +211,46 @@
             restrict: 'A',
             link: function ($scope, element, attrs) {
                 $timeout(function () {
-                    $scope.items = [
-                        {
-                            status: 'app/status/bad.png',
-                            timeExec: '2017-03-03 17:30:10.0',
-                            timeUpload: '2017-03-03 17:30:10.0',
-                            value: 28,
-                            unit: '°C',
-                            sensor: 'Temperature DHT Sensor',
-                            node: {
-                                id: 'n1',
-                                name: 'Node RDC'
-                            }
-                        },
-                        {
-                            status: 'app/status/bad.png',
-                            timeExec: '2017-03-03 17:30:10.0',
-                            timeUpload: '2017-03-03 17:30:10.0',
-                            value: 28,
-                            unit: '°C',
-                            sensor: 'Temperature DHT Sensor',
-                            node: {
-                                id: 'n1',
-                                name: 'Node RDC'
-                            }
-                        }
-                    ]
-
-                    $scope.pages = new Array(5);
-                    $scope.currentPage = 0;
                 }, 0);
             }
         };
     });
 
-     app.directive('harmDirective', function (API, $timeout, baConfig, Utils) {
+    app.directive('harmDirective', function (API, $timeout, baConfig, Utils) {
         return {
             restrict: 'A',
             link: function ($scope, element, attrs) {
-                $timeout(function () {
-                    $scope.items = [
-                        {
-                            status: 'app/status/bad.png',
-                            timeExec: '2017-03-03 17:30:10.0',
-                            timeUpload: '2017-03-03 17:30:10.0',
-                            value: 28,
-                            unit: '°C',
-                            sensor: 'Temperature DHT Sensor',
-                            node: {
-                                id: 'n1',
-                                name: 'Node RDC'
-                            }
-                        },
-                        {
-                            status: 'app/status/bad.png',
-                            timeExec: '2017-03-03 17:30:10.0',
-                            timeUpload: '2017-03-03 17:30:10.0',
-                            value: 28,
-                            unit: '°C',
-                            sensor: 'Temperature DHT Sensor',
-                            node: {
-                                id: 'n1',
-                                name: 'Node RDC'
-                            }
-                        }
-                    ]
+                // $timeout(function () {
+                //     $scope.items = [
+                //         {
+                //             status: 'app/status/bad.png',
+                //             timeExec: '2017-03-03 17:30:10.0',
+                //             timeUpload: '2017-03-03 17:30:10.0',
+                //             value: 28,
+                //             unit: '°C',
+                //             sensor: 'Temperature DHT Sensor',
+                //             node: {
+                //                 id: 'n1',
+                //                 name: 'Node RDC'
+                //             }
+                //         },
+                //         {
+                //             status: 'app/status/bad.png',
+                //             timeExec: '2017-03-03 17:30:10.0',
+                //             timeUpload: '2017-03-03 17:30:10.0',
+                //             value: 28,
+                //             unit: '°C',
+                //             sensor: 'Temperature DHT Sensor',
+                //             node: {
+                //                 id: 'n1',
+                //                 name: 'Node RDC'
+                //             }
+                //         }
+                //     ]
 
-                    $scope.pages = new Array(5);
-                    $scope.currentPage = 0;
-                }, 0);
+                //     $scope.pages = new Array(5);
+                //     $scope.currentPage = 0;
+                // }, 0);
             }
         };
     });

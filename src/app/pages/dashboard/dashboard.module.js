@@ -6,8 +6,8 @@
   'use strict';
 
   angular.module('BlurAdmin.pages.dashboard', [])
-      .config(routeConfig)
-      .controller('DashboardController', dashboardController);
+    .config(routeConfig)
+    .controller('DashboardController', dashboardController);
 
   /** @ngInject */
   function routeConfig($stateProvider, baConfigProvider) {
@@ -211,216 +211,111 @@
     };
 
     $stateProvider
-        .state('dashboard', {
-          url: '/dashboard',
-          templateUrl: 'app/pages/dashboard/dashboard.html',
-          title: 'Trang chủ',
-          sidebarMeta: {
-            icon: 'ion-android-home',
-            order: 0,
-          },
-        });
+      .state('dashboard', {
+        url: '/dashboard',
+        templateUrl: 'app/pages/dashboard/dashboard.html',
+        title: 'Trang chủ',
+        sidebarMeta: {
+          icon: 'ion-android-home',
+          order: 0,
+        },
+      });
   }
 
-  function dashboardController($scope, $timeout, baConfig, layoutPaths){
-    $scope.locations = [
-      {
-        id : 'hnptit',
-        name : 'PTIT'
-      },
-      {
-        id : 'hnbk',
-        name : 'BK'
-      },
-      {
-        id : 'hntl',
-        name : 'TLU'
+  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, Socket, $rootScope) {
+    if (!Socket.socket || !Socket.socket.connected) Socket.connect();
+    API.getInfo('locations', null, function (res) {
+      if (res.success) {
+        $scope.locations = res.data;
+        $scope.currentLocation = $scope.locations[0];
+        $rootScope.locations = $scope.locations;
+        API.getInfo('roots', null, function (res) {
+          if (res.success) {
+            $scope.roots = res.data;
+            $rootScope.roots = $scope.roots;            
+            API.getInfo('nodes', null, function (res) {
+              if (res.success) {
+                $scope.nodes = res.data;
+                // $scope.currentNode = $scope.nodes[0];
+                $scope.tempNodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
+                $scope.currentNode = $scope.tempNodes[0];
+                $rootScope.nodes = $scope.nodes;                
+              } else {
+                toastr.error(res.msg, "Lỗi");
+              }
+            });
+          } else {
+            toastr.error(res.msg, "Lỗi");
+          }
+        });
+      } else {
+        toastr.error(res.msg, "Lỗi");
       }
-    ];
-    $scope.nodes = [
-      {
-        id: 'f1',
-        name : 'NODE R1',
-        loc : 'hnptit'
-      },
-      {
-        id: 'f2',
-        name : 'NODE R2',
-        loc : 'hnptit'
-      },
-      {
-        id: 'f3',
-        name : 'NODE R3',
-        loc : 'hnptit'
-      },
-      {
-        id: 'f4',
-        name : 'NODE RdS',
-        loc : 'hnbk'
-      },
-      {
-        id: 'f5',
-        name : 'NODE RXS',
-        loc : 'hnbk'
-      },
-      {
-        id: 'f8',
-        name : 'NODE RTLA',
-        loc : 'hntl'
+    });
+
+    $scope.changeLocation = function(id) {
+      $scope.tempNodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
+      try {
+        $scope.currentNode = $scope.tempNodes[0];         
+      } catch (e){
+        $scope.currentNode = {};
       }
-    ];
+    }
+    
+    $scope.changeNode = function(){
+      console.log('g')
+    }
 
-    $scope.currentNode = $scope.nodes[0];
-    $scope.currentLocation = $scope.locations[0];
+    $scope.submit = function() {
+      
+    }
+    // $timeout(() => {
+    //   console.log(API.findAllInItems($scope.currentLocation._id, $scope.roots, 'locationId'));
+    // }, 3000);
 
-    $timeout(function(){
+    $timeout(function () {
       var layoutColors = baConfig.colors;
-      var chart = AmCharts.makeChart('zoomAxisChart', {
-        "type": "serial",
-        "theme": "none",
-        "color": layoutColors.defaultText,
-        "dataDateFormat": "JJ:NN:SS",
-        "precision": 2,
-        "valueAxes": [{
-          color: layoutColors.defaultText,
-          axisColor: layoutColors.defaultText,
-          gridColor: layoutColors.defaultText,
-          "id": "v1",
-          "title": "Nhiệt độ/Độ ẩm",
-          "position": "left",
-          "autoGridCount": false
-        }, {
-          color: layoutColors.defaultText,
-          axisColor: layoutColors.defaultText,
-          gridColor: layoutColors.defaultText,
-          "id": "v2",
-          "title": "AQI",
-          "gridAlpha": 0,
-          "position": "right",
-          "autoGridCount": false
-        }],
-        "graphs": [{
-          "id": "g1",
-          "valueAxis": "v1",
-          "bullet": "round",
-          "bulletBorderAlpha": 1,
-          "bulletColor": layoutColors.defaultText,
-          color: layoutColors.defaultText,
-          "bulletSize": 5,
-          "hideBulletsCount": 50,
-          "lineThickness": 2,
-          "lineColor": layoutColors.danger,
-          "type": "smoothedLine",
-          "title": "Nhiệt độ",
-          "useLineColorForBulletBorder": true,
-          "valueField": "temp",
-          "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
-        }, {
-          "id": "g2",
-          "valueAxis": "v1",
-          color: layoutColors.defaultText,
-          "bullet": "round",
-          "bulletBorderAlpha": 1,
-          "bulletColor": layoutColors.defaultText,
-          "bulletSize": 5,
-          "hideBulletsCount": 50,
-          "lineThickness": 2,
-          "lineColor": layoutColors.warning,
-          "type": "smoothedLine",
-          "dashLength": 5,
-          "title": "Độ ẩm",
-          "useLineColorForBulletBorder": true,
-          "valueField": "hum",
-          "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
+
+      var options = {
+        dataDateFormat: "JJ:NN:SS",
+        axis: [
+          { title: 'Nhiệt độ/Độ ẩm', position: "left" },
+          { title: 'AQI', position: "right" }
+        ],
+        graphs: [{
+          valueAxis: 'v1',
+          title: 'Nhiệt độ',
+          valueField: 'temp',
+          lineColor: layoutColors.danger
         },
         {
-          "id": "g3",
-          "valueAxis": "v2",
-          color: layoutColors.defaultText,
-          "bullet": "round",
-          "bulletBorderAlpha": 1,
-          "bulletColor": layoutColors.defaultText,
-          "bulletSize": 5,
-          "hideBulletsCount": 50,
-          "lineThickness": 2,
-          "lineColor": layoutColors.success,
-          "type": "smoothedLine",
-          "dashLength": 5,
-          "title": "Chất lượng không khí",
-          "useLineColorForBulletBorder": true,
-          "valueField": "aqi",
-          "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
-        }],
-        "chartScrollbar": {
-          "graph": "g1",
-          "oppositeAxis": false,
-          "offset": 30,
-          gridAlpha: 0,
-          color: layoutColors.defaultText,
-          scrollbarHeight: 50,
-          backgroundAlpha: 0,
-          selectedBackgroundAlpha: 0.05,
-          selectedBackgroundColor: layoutColors.defaultText,
-          graphFillAlpha: 0,
-          autoGridCount: true,
-          selectedGraphFillAlpha: 0,
-          graphLineAlpha: 0.2,
-          selectedGraphLineColor: layoutColors.defaultText,
-          selectedGraphLineAlpha: 1
+          valueAxis: 'v1',
+          title: 'Độ ẩm',
+          valueField: 'hum',
+          lineColor: layoutColors.warning
         },
-        "chartCursor": {
-          "pan": true,
-          "cursorColor" : layoutColors.danger,
-          "valueLineEnabled": true,
-          "valueLineBalloonEnabled": true,
-          "cursorAlpha": 0,
-          "valueLineAlpha": 0.2,
-          "categoryBalloonDateFormat": "JJ:NN:SS"
-        },
-        "categoryField": "date",
-        "categoryAxis": {
-          "axisColor": layoutColors.defaultText,
-          "color": layoutColors.defaultText,
-          "gridColor": layoutColors.defaultText,
-          "parseDates": true,
-          "dashLength": 1,
-          "minorGridEnabled": true,
-          "minPeriod": "ss",
-        },
-        "legend": {
-          "useGraphSettings": true,
-          "position": "top",
-          "color": layoutColors.defaultText
-        },
-        "balloon": {
-          "borderThickness": 1,
-          "shadowAlpha": 0
-        },
-        "export": {
-          "enabled": true,
-          "dateFormat": "JJ:NN:SS"
-        },
-        "dataProvider": [],
-        pathToImages: layoutPaths.images.amChart
-      });
-      
-      var ran = function(min, max) {
-        return parseFloat((Math.random() * (max - min) + min).toFixed(1));
+        {
+          valueAxis: 'v2',
+          title: 'Chất lượng không khí',
+          valueField: 'aqi',
+          lineColor: layoutColors.info
+        }
+        ],
+        categoryField: "date",
+        minPeriod: "ss",
+        dataProvider: []
       }
-      
-      setInterval( function() {
+      // var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
+      var chart = AmCharts.makeChart('zoomAxisChart', Utils.buildChartOptions(options));
+      Socket.sendMessage('get_index');
+      Socket.socket.on('get_index', function (data) {
+        data.date = new Date(data.date);
         if (chart.dataProvider.length >= 15) {
           chart.dataProvider.shift();
         }
-        var n = new Date();
-        chart.dataProvider.push( {
-          date:  n.getHours() + ':' + n.getMinutes() + ':' + n.getSeconds(),
-          temp : ran(26, 30),
-          hum : ran(60,65),
-          aqi : ran(1, 3)
-        } );
+        chart.dataProvider.push(data);
         chart.validateData();
-      }, 3000 );
+      });
     });
   }
 })();
