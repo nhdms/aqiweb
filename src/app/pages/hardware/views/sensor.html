@@ -1,0 +1,83 @@
+<div class="widgets">
+    <input type="hidden"  id="device-type" value="sensors">
+   <div class="datepicker row">
+      <form>
+         <div class="col-xlg-1 col-md-2 col-sm-1">
+            <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc">
+            </select>
+         </div>
+         <div class="col-xlg-1 col-md-2 col-sm-1">
+            <select class="form-control" id="select_root">
+               <option ng-repeat="root in roots track by root._id" value="{{root._id}}" ng-if="root.loc == currentLoc.id" ng-model="currentRoot">
+                  {{root.name}}
+               </option>
+            </select>
+         </div>
+         <div class="col-xlg-1 col-md-2 col-sm-1">
+            <select class="form-control" id="select_node" ng-change="getAllSensors()" ng-model="currentNode">
+               <option ng-repeat="node in nodes track by node._id" value="{{node._id}}" ng-if="node.rootId == currentRoot._id">
+                  {{node.name}}
+               </option>
+            </select>
+         </div>
+         <div class="col-xlg-1 col-md-2 col-sm-1">
+             <button type="button" class="btn btn-info btn-icon" ng-click="getAllSensors()"><i class="ion-stats-bars"></i></button>
+         </div>
+      </form>
+   </div>
+         <div class="row" style="margin-top:20px"></div>
+   
+   <div class="widgets">
+    <div class="row">
+        <div class="col-md-12">
+            <div ba-panel ba-panel-title="Thông tin các Root khu vực {{currentLoc.name}}" ba-panel-class="with-scroll">
+                <div class="add-row-editable-table">
+                    <button class="btn btn-primary" ng-click="addSensorsRow()"> Thêm sensor </button>
+                </div>
+                <table class="table table-bordered table-hover table-condensed">
+                    <tr>
+                        <td></td>
+                        <td>Tên </td>
+                        <td> Mô tả </td>
+                        <td> Loại </td>
+                        <td> Hành động </td>
+                    </tr>
+                    <tr ng-repeat="node in sensors" class="editable-row">
+                        <td>
+                            {{$index + 1}}
+                        </td>
+                        <td><span editable-text="node.name" blur="cancel" field="name" e-required> {{node.name ? node.name : 'tên node'}} </span></td>
+                        <td><span editable-text="node.description" blur="cancel" field="description"> {{node.description ? node.description : 'mô tả'}} </span></td>
+                        <td>
+                            <span editable-select="node.type" blur="cancel" field="type" e-ng-options="s for s in [1,2,3]"> {{node.type ? node.type : 'Cảm biến'}} </span>
+                        </td>
+                        <td>
+                            <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline"
+                                    shown="inserted == node">
+                                <button type="submit" ng-click="addHW(node,'sensor', $event);" ng-disabled="rowform.$waiting" class="btn btn-primary editable-table-button btn-xs">
+                                Save
+                                </button>
+                                <button type="button" ng-disabled="rowform.$waiting" ng-click="close(rowform, $index)" class="btn btn-default editable-table-button btn-xs">
+                                Cancel
+                                </button>
+                            </form>
+                            <div class="buttons" ng-show="!rowform.$visible">
+                                <button class="btn btn-danger editable-table-button btn-xs" ng-click="remove('sensors', node._id, $index)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+   <div class="row">
+      <!--<a ng-repeat="page in pages track by $index"> {{$index}} </a>-->
+      <div class="col-md-6 col-md-offset-3">
+         <div class="btn-group center" role="group" aria-label="First group">
+            <button type="button" ng-repeat="page in pages track by $index" class="btn {{$index == currentPage ? 'btn-primary' : 'btn-info'}}"
+               ng-click="getInfo($index)"> {{$index + 1}} </button>
+         </div>
+      </div>
+   </div>
+</div>

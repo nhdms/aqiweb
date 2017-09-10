@@ -1,0 +1,52 @@
+<input type="hidden" id="device-type" value="nodes">
+<div class="row" node-directive>
+    <div class="col-xlg-1 col-md-2 col-sm-1">
+        <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc" ng-change="getAllNodes()">
+            </select>
+    </div>
+</div>
+<div class="row" style="margin-top:20px"></div>
+<div class="widgets">
+    <div class="row">
+        <div class="col-md-12">
+            <div ba-panel ba-panel-title="Thông tin các Root khu vực {{currentLoc.name}}" ba-panel-class="with-scroll">
+                <div class="add-row-editable-table">
+                    <button class="btn btn-primary" ng-click="addNodesRow()"> Thêm node </button>
+                </div>
+                <table class="table table-bordered table-hover table-condensed">
+                    <tr>
+                        <td></td>
+                        <td>Tên </td>
+                        <td> Mô tả </td>
+                        <td> Root </td>
+                        <td> Hành động </td>
+                    </tr>
+                    <tr ng-repeat="node in nodes" class="editable-row">
+                        <td>
+                            {{$index}}
+                        </td>
+                        <td><span editable-text="node.name" blur="cancel"> {{node.name}} </span></td>
+                        <td><span editable-text="node.description" blur="cancel"> {{node.description ? node.description : 'chỉnh sửa mô tả'}} </span></td>
+                        <td class="select-td">
+                            <select class="form-control" ng-options="root as root.name for root in roots track by root.id" ng-model="node.root">
+                            </select>
+                        </td>
+                        <td>
+                            <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == node">
+                                <button type="submit" ng-click="addHW(node, 'node', $event);" ng-disabled="rowform.$waiting" class="btn btn-primary editable-table-button btn-xs">
+                        Save
+                        </button>
+                                <button type="button" ng-disabled="rowform.$waiting" ng-click="close(rowform, $index)" class="btn btn-default editable-table-button btn-xs">
+                        Cancel
+                        </button>
+                            </form>
+                            <div class="buttons" ng-show="!rowform.$visible">
+                                <button class="btn btn-danger editable-table-button btn-xs" ng-click="remove('nodes', node._id, $index)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

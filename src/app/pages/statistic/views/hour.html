@@ -1,0 +1,41 @@
+<div class="widgets" hour-directive>
+    <div class="datepicker row">
+        <form>
+            <div class="col-xlg-1 col-md-2 col-sm-1">
+                <div class="input-group">
+                    <input type="text" class="form-control" uib-datepicker-popup="{{datePicker.format}}" datepicker-options="datePicker.options" ng-model="datePicker.dt" is-open="datePicker.opened"
+                        ng-required="true" close-text="Close" alt-input-formats="altInputFormats" show-button-bar="false" />
+                    <span class="input-group-btn">
+               <button type="button" class="btn btn-default" ng-click="datePicker.open()"><i class="glyphicon glyphicon-calendar"></i></button>
+               </span>
+                </div>
+            </div>
+
+            <div class="col-xlg-1 col-md-2 col-sm-1">
+                <select id="select_node" class="form-control" data-ng-model="currentNode" data-ng-options="node as node.name for node in nodes track by node._id">
+            </select>
+            </div>
+
+            <div class="col-xlg-1 col-md-2 col-sm-1">
+                <button type="button" class="btn btn-info btn-icon" ng-click="btnStatistic(0)"><i class="ion-stats-bars"></i></button>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ NHIỆT ĐỘ THEO TỪNG GIỜ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+            <div id="temp-chart" class="admin-chart"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ ĐỘ ẨM THEO TỪNG GIỜ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+            <div id="hum-chart" class="admin-chart"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ CHỈ SỐ CHẤT LƯỢNG KHÔNG KHÍ THEO TỪNG GIỜ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+            <div id="aqi-chart" class="admin-chart"></div>
+        </div>
+    </div>
+</div>
