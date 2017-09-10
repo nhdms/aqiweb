@@ -25,7 +25,7 @@
          </div>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" id="select_sensor">
-               <option ng-repeat="sensor in sensors track by $index" value="{{sensor._id}}" ng-if="sensor.node == currentNode.id" type="{{sensor.type}}">
+               <option ng-repeat="sensor in sensors track by $index" value="{{sensor.type}}" ng-if="sensor.node == currentNode.id" type="{{sensor.type}}">
                   {{sensor.name}}
                </option>
             </select>

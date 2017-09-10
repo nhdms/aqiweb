@@ -41,6 +41,13 @@
             }
         }
 
+        this.getSafeRange = function(cb) {
+            $http.get(this.baseURL + '/data/saferange')
+            .then(function (response) {
+                cb(response.data);
+            })
+        } 
+
         this.getChildInfo = function (type, parent, value, cb) {
             if (this.types.indexOf(type) != -1) {
                 var url = this.baseURL + '/' + type + '/info' + ((null == value) ? '' : '?' + parent + 'Id=' + value);
@@ -80,13 +87,19 @@
 
         this.getData = function (obj, type, cb) {
             // var send = Object.assign(obj, {t)
-            // console.log(send, type)
+            // console.log(obj)
             var r = Math.random() * 1E3;
             $http.post(this.baseURL + '/data/hour?type=' + type, obj)
                 .then(function (response) {
                     // cb(response);
-                    if (response.data.success)
-                        cb(response.data.data)
+                    // console.log(response)
+                    if (response.data.success){
+                        var keys = response.data.data.map((i) =>{ return i._id})
+                        var a = [...Array(24).keys()].map((i)=> {
+                            if (keys.indexOf(i) === -1) response.data.data.push({_id: i, date: new Date(obj.date), min: 0, max:0, avg: 0})
+                        })
+                        cb(response.data.data)                        
+                    }
                     else alert(response.data.msg);
                 });
         }
@@ -132,6 +145,15 @@
                 cb(response)
             });
         }
+
+        this.getNodesByLocation = function(lid, cb) {
+            var url = this.baseURL + '/nodes/nodes'
+            $http.get(url)
+            .then(function (response) {
+                cb(response.data);
+            })
+        }
+
         return this;
     }
 

@@ -222,12 +222,12 @@
       });
   }
 
-  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, Socket, $rootScope, ngProgressFactory) {
+  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr , $rootScope, ngProgressFactory, SocketURL) {
     $scope.progressbar = ngProgressFactory.createInstance();
     $scope.progressbar.setColor('#209e91');
-    $scope.progressbar.start();    
-    
-    if (!Socket.socket || !Socket.socket.connected) Socket.connect();
+    $scope.progressbar.start();
+
+    if (!$scope.socket || !$scope.socket.connected) $scope.socket = mqtt.connect(SocketURL);
     API.getInfo('locations', null, function (res) {
       if (res.success) {
         $scope.locations = res.data;
@@ -261,6 +261,12 @@
       }
     });
 
+    if (!$rootScope.safeRange) {
+      API.getSafeRange(function(res){
+        $rootScope.safeRange = res.data
+      })
+    }
+
     $scope.changeLocation = function(id) {
       $scope.tempNodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
       try {
@@ -274,56 +280,70 @@
       console.log('g')
     }
 
-    $scope.submit = function() {
-      
-    }
+    
     // $timeout(() => {
     //   console.log(API.findAllInItems($scope.currentLocation._id, $scope.roots, 'locationId'));
     // }, 3000);
 
+
     $timeout(function () {
       var layoutColors = baConfig.colors;
 
-      var options = {
-        dataDateFormat: "JJ:NN:SS",
-        axis: [
-          { title: 'AQI', position: "left" },
-          { title: 'Nhiệt độ/Độ ẩm', position: "right" }
-        ],
-        graphs: [{
-          valueAxis: 'v1',
-          title: 'Nhiệt độ',
-          valueField: 'temp',
-          lineColor: layoutColors.danger
-        },
-        {
-          valueAxis: 'v1',
-          title: 'Độ ẩm',
-          valueField: 'hum',
-          lineColor: layoutColors.warning
-        },
-        {
-          valueAxis: 'v2',
-          title: 'Chất lượng không khí',
-          valueField: 'aqi',
-          lineColor: layoutColors.info
-        }
-        ],
-        categoryField: "date",
-        minPeriod: "ss",
-        dataProvider: []
+      $scope.socket.subscribe("NODE_001");
+      
+      var humChart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({title: 'Độ ẩm', min: 40, max: 70}))),
+          tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({title: 'Nhiệt độ', min: 26, max: 32}))),
+          aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({title: 'PM2', min: 0, max: 2})));
+
+      $scope.submit = function() {
+        // console.log()
+        humChart.dataProvider = []
+        tempChart.dataProvider = []
+        aqiChart.dataProvider = []
+        $scope.socket.subscribe($scope.currentNode._id);      
       }
-      // var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
-      var chart = AmCharts.makeChart('zoomAxisChart', Utils.buildChartOptions(options));
-      Socket.sendMessage('get_index');
-      Socket.socket.on('get_index', function (data) {
-        data.date = new Date(data.date);
-        if (chart.dataProvider.length >= 15) {
-          chart.dataProvider.shift();
-        }
-        chart.dataProvider.push(data);
-        chart.validateData();
+      $scope.socket.on("message", function(topic, payload) {
+        console.log(topic, payload.toString());
+        var str = payload.toString();
+        try {
+          var arr = str.trim().split(' '),
+              date = new Date();
+
+          if (+arr[1] > 0){
+            if (humChart.dataProvider.length >= 15) {
+              humChart.dataProvider.shift();
+            }
+            humChart.dataProvider.push({date: date, value: +arr[1]});
+            humChart.validateData();
+          }
+          if (+arr[2] > 0) {
+            if (tempChart.dataProvider.length >= 15) {
+              tempChart.dataProvider.shift();
+            }
+            tempChart.dataProvider.push({date: date, value: +arr[2]});
+            tempChart.validateData();
+          }
+
+          if (aqiChart.dataProvider.length >= 15) {
+            aqiChart.dataProvider.shift();
+          }
+          aqiChart.dataProvider.push({date: date, value: +arr[3]});
+          aqiChart.validateData();
+        } catch (e) { console.log(e) }
       });
+
+      
+      
+
+      // Socket.socket.on('get_index', function (data) {
+      //   console.log(data);
+      //   data.date = new Date(data.date);
+      //   if (chart.dataProvider.length >= 15) {
+      //     chart.dataProvider.shift();
+      //   }
+      //   chart.dataProvider.push(data);
+      //   chart.validateData();
+      // });
     });
   }
 })();

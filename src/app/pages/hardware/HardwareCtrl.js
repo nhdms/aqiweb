@@ -26,6 +26,7 @@
                 $rootScope.locations = $scope.locations;
                 API.getInfo('roots', null, function (res) {
                     if (res.success && res.data.length) {
+                        // res.data.push({name: 'node độc lập'})
                         $scope.roots = res.data;
                         $rootScope.roots = $scope.roots;
                         $scope.currentRoot = $scope.roots[0];
@@ -43,7 +44,18 @@
                     } else {
                         toastr.error(res.msg || "Không tìm thấy root", "Lỗi");
                         $scope.progressbar.complete();
-                    }
+                        API.getInfo('nodes', null, function (res) {
+                            if (res.success) {
+                                $scope.nodes = res.data;
+                                $scope.currentNode = $scope.nodes[0];
+                                $rootScope.nodes = $scope.nodes;
+                                $scope.progressbar.complete();
+                            } else {
+                                toastr.error(res.msg || "Không tìm thấy node", "Lỗi");
+                                $scope.progressbar.complete();
+                            }
+                        });
+                    } 
                 });
             } else {
                 toastr.error(res.msg || "Không tìm thấy location", "Lỗi");
@@ -51,24 +63,30 @@
             }
         });
 
+        if (!$rootScope.safeRange) {
+            API.getSafeRange(function(res){
+              $rootScope.safeRange = res.data
+            })
+          }
+
         $scope.close = function(row, i) {
             row.$cancel();
             $scope.sensors.splice(i, 1);
         }
 
-        $scope.addSensor = function(sensor, e) {
-            if (!sensor.name) {
+        $scope.addHW = function(hw,type, e) {
+            if (!hw.name) {
                 e.preventDefault();
-                toastr.warning("Không được bỏ trống tên sensor!");
+                toastr.warning("Không được bỏ trống tên " + type +"!");
             }
-            API.save('sensors', sensor, function(res) {
+            if ('node' == type && !!!hw.rootId) hw.lid = $scope.currentLocation._id
+            API.save(type + 's', hw, function(res) {
                 if (!res.data.success) return toastr.error(res.data.msg);
-                toastr.success("Thêm sensor " + sensor.name + " thành công!");
+                toastr.success("Thêm " + type + " " + hw.name + " thành công!");
             });
         }
 
         
-
         $scope.submitItem = function (node, $data, $form) {
             if (!node._id) return;
             var type = document.getElementById('device-type').value;
@@ -87,7 +105,7 @@
 
         $scope.remove = function (type, id, index) {
             if (!id) return $scope[type].splice(index, 1);
-            var ok = confirm('Bạn có chắc chắn muốn xóa ' + type + 'này');
+            var ok = confirm('Bạn có chắc chắn muốn xóa ' + type + ' này');
             if (ok)
                 API.remove(type, id, function (res) {
                     console.log(res.data.success);
@@ -99,7 +117,7 @@
                 });
         }
 
-        $scope.addSensorRow = function () {
+        $scope.addSensorsRow = function () {
             $scope.inserted = {
                 name: '',
                 type: 1,
@@ -107,6 +125,15 @@
                 nodeId : document.getElementById('select_node').value
             };
             $scope.sensors.push($scope.inserted);
+        }
+
+        $scope.addNodesRow = function () {
+            $scope.inserted = {
+                name: 'tên node',
+                description: '',
+                rootId: '',
+            };
+            $scope.nodes.push($scope.inserted);
         }
 
         $scope.getAllSensors = function () {

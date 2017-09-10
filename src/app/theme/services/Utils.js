@@ -10,50 +10,9 @@
 
     /** @ngInject */
     function Utils(baConfig, layoutPaths) {
-        this.generateChartData = function (min, max) {
-            var chartData = [];
-            var firstDate = new Date();
-            firstDate.setDate(firstDate.getDate() - 150);
-            var ran = function (min, max) {
-                return parseFloat((Math.random() * (max - min) + min).toFixed(1));
-            }
-            for (var i = 0; i < 23; i++) {
-                // we create date objects here. In your data, you can have date strings
-                // and then set format of your dates using chart.dataDateFormat property,
-                // however when possible, use date objects, as this will speed up chart rendering.
-                var newDate = new Date(firstDate);
-                newDate.setHours(i);
 
-                chartData.push({
-                    date: newDate,
-                    max: ran(max - 3, max + 3),
-                    min: ran(min, min + 3),
-                    avg: ran(min + 4, max - 4),
-                    ok1: min,
-                    ok2: (min + max) / 2
-                });
-            }
-            return chartData;
-        }
-
-        this.ran = function (min, max) {
-            return parseFloat((Math.random() * (max - min) + min).toFixed(1));
-        }
-
-        // {
-        //     dataDateFormat : "JJ:HH:SS",
-        //     axis : [
-        //         {title : 'Nhiệt độ', position : "left"}
-        //     ],
-        //     graphs : [
-        //         valueAxis : 'v1',
-        //         title: 'nhiệt độ cao nhất',
-        //         valueField : 'max'
-        //     ],
-        //     categoryField: "date",
-        //     dataProvider : []
-        // }
         this.buildChartOptions = function (data) {
+            console.log(data.dataProvider)
             var layoutColors = baConfig.colors;
             var ret = {
                 "type": "serial",
@@ -61,7 +20,9 @@
                 "color": layoutColors.defaultText,
                 "dataDateFormat": data.dataDateFormat,
                 "precision": 2,
-                "valueAxes": [],
+                "valueAxes": [
+                    
+                ],
                 "graphs": [],
                 "chartScrollbar": {
                     "graph": "g1",
@@ -122,11 +83,22 @@
                     color: layoutColors.defaultText,
                     axisColor: layoutColors.defaultText,
                     gridColor: layoutColors.defaultText,
+                    "includeGuidesInMinMax": true,
                     "id": "v" + i,
                     "title": obj.title,
                     "position": obj.position,
-                    "autoGridCount": false
+                    "autoGridCount": false,
+                    guides: [{
+                        "fillAlpha": 0.3,
+                        "fillColor": "#c6ffb3",
+                        "lineAlpha": 0.3,
+                        "toValue": data.range.max || 0,
+                        "value": data.range.min || 0,
+                        "label": "Ngưỡng an toàn",
+                        "inside": true
+                    }]
                 });
+                
             }
 
             for (var i in data.graphs) {
@@ -154,141 +126,67 @@
             return ret;
         }
 
-        this.getHumChartOptions = function(data) {
+
+        // {title: title, }
+        this.getRealTimeChartOptions = function(data) {
             var layoutColors = baConfig.colors;
 
             return {
                 dataDateFormat: "JJ:NN:SS",
                 axis: [
-                    { title: 'Độ ẩm', position: "left" }
+                    { title: data.title, position: "left" }
                 ],
-                graphs: [{
+                graphs: [
+                {
                     valueAxis: 'v1',
-                    title: 'Độ ẩm cao nhất',
-                    valueField: 'max',
+                    title: 'Giá trị hiện tại',
+                    valueField: 'value',
                     lineColor: layoutColors.danger
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Độ ẩm trung bình',
-                    valueField: 'avg',
-                    lineColor: layoutColors.warning
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Độ ẩm thấp nhất',
-                    valueField: 'min',
-                    lineColor: layoutColors.info
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Ngưỡng an toàn thấp nhất',
-                    valueField: 'ok1',
-                    lineColor: layoutColors.primaryLight
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Ngưỡng an toàn cao nhất',
-                    valueField: 'ok2',
-                    lineColor: layoutColors.primary
-                },
+                }
                 ],
                 categoryField: "date",
-                minPeriod: "hh",
-                dataProvider: data
+                minPeriod: "ss",
+                dataProvider: [],
+                range: {
+                    min: data.min,
+                    max: data.max
+                }
             }
         }
-
-        this.getTempChartOptions = function(data) {
+        // {title, values, range:{min, max}}
+        this.getStatisticChartOptions = function(data) {
+            // console.log(data)
             var layoutColors = baConfig.colors;
 
             return {
                 dataDateFormat: "JJ:NN:SS",
                 axis: [
-                    { title: 'Nhiệt độ', position: "left" }
+                    { title: data.title, position: "left" }
                 ],
                 graphs: [{
                     valueAxis: 'v1',
-                    title: 'Nhiệt độ cao nhất',
+                    title: data.title + ' cao nhất',
                     valueField: 'max',
                     lineColor: layoutColors.danger
                 },
                 {
                     valueAxis: 'v1',
-                    title: 'Nhiệt độ trung bình',
+                    title: data.title + ' trung bình',
                     valueField: 'avg',
                     lineColor: layoutColors.warning
                 },
                 {
                     valueAxis: 'v1',
-                    title: 'Nhiệt độ thấp nhất',
+                    title: data.title + ' thấp nhất',
                     valueField: 'min',
                     lineColor: layoutColors.info
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Ngưỡng an toàn thấp nhất',
-                    valueField: 'ok1',
-                    lineColor: layoutColors.primaryLight
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Ngưỡng an toàn cao nhất',
-                    valueField: 'ok2',
-                    lineColor: layoutColors.primary
                 },
                 ],
                 categoryField: "date",
                 minPeriod: "hh",
-                dataProvider: data
+                dataProvider: data.value,
+                range: data.range
             }
-        }
-        this.getAqiChartOptions = function (data) {
-            var layoutColors = baConfig.colors;        
-            return {
-                dataDateFormat: "JJ:NN:SS",
-                axis: [
-                    { title: 'Chỉ số chất lượng không khí aqi', position: "left" }
-                ],
-                graphs: [{
-                    valueAxis: 'v1',
-                    title: 'AQI cao nhất',
-                    valueField: 'max',
-                    lineColor: layoutColors.danger
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'AQI trung bình',
-                    valueField: 'avg',
-                    lineColor: layoutColors.warning
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'AQI thấp nhất',
-                    valueField: 'min',
-                    lineColor: layoutColors.info
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Ngưỡng an toàn thấp nhất',
-                    valueField: 'ok1',
-                    lineColor: layoutColors.primaryLight
-                },
-                {
-                    valueAxis: 'v1',
-                    title: 'Ngưỡng an toàn cao nhất',
-                    valueField: 'ok2',
-                    lineColor: layoutColors.primary
-                },
-                ],
-                categoryField: "date",
-                minPeriod: "hh",
-                dataProvider: data
-            }
-        }
-
-        this.getSafeRange = function (type) {
-            return (1 == type) ? [26, 32] : (2 == type) ? [2 , 5] : [40, 70];
         }
         return this;
     }

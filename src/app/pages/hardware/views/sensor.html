@@ -32,7 +32,7 @@
         <div class="col-md-12">
             <div ba-panel ba-panel-title="Thông tin các Root khu vực {{currentLoc.name}}" ba-panel-class="with-scroll">
                 <div class="add-row-editable-table">
-                    <button class="btn btn-primary" ng-click="addSensorRow()"> Thêm sensor </button>
+                    <button class="btn btn-primary" ng-click="addSensorsRow()"> Thêm sensor </button>
                 </div>
                 <table class="table table-bordered table-hover table-condensed">
                     <tr>
@@ -54,7 +54,7 @@
                         <td>
                             <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline"
                                     shown="inserted == node">
-                                <button type="submit" ng-click="addSensor(node, $event);" ng-disabled="rowform.$waiting" class="btn btn-primary editable-table-button btn-xs">
+                                <button type="submit" ng-click="addHW(node,'sensor', $event);" ng-disabled="rowform.$waiting" class="btn btn-primary editable-table-button btn-xs">
                                 Save
                                 </button>
                                 <button type="button" ng-disabled="rowform.$waiting" ng-click="close(rowform, $index)" class="btn btn-default editable-table-button btn-xs">

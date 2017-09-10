@@ -1,4 +1,4 @@
-<input type="hidden"  id="device-type" value="nodes">
+<input type="hidden" id="device-type" value="nodes">
 <div class="row" node-directive>
     <div class="col-xlg-1 col-md-2 col-sm-1">
         <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc" ng-change="getAllNodes()">
@@ -11,7 +11,7 @@
         <div class="col-md-12">
             <div ba-panel ba-panel-title="Thông tin các Root khu vực {{currentLoc.name}}" ba-panel-class="with-scroll">
                 <div class="add-row-editable-table">
-                    <button class="btn btn-primary" ng-click="addNode()"> Thêm node </button>
+                    <button class="btn btn-primary" ng-click="addNodesRow()"> Thêm node </button>
                 </div>
                 <table class="table table-bordered table-hover table-condensed">
                     <tr>
@@ -32,8 +32,16 @@
                             </select>
                         </td>
                         <td>
+                            <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == node">
+                                <button type="submit" ng-click="addHW(node, 'node', $event);" ng-disabled="rowform.$waiting" class="btn btn-primary editable-table-button btn-xs">
+                        Save
+                        </button>
+                                <button type="button" ng-disabled="rowform.$waiting" ng-click="close(rowform, $index)" class="btn btn-default editable-table-button btn-xs">
+                        Cancel
+                        </button>
+                            </form>
                             <div class="buttons" ng-show="!rowform.$visible">
-                                <button class="btn btn-danger editable-table-button btn-xs" ng-click="removeUser($index)">Delete</button>
+                                <button class="btn btn-danger editable-table-button btn-xs" ng-click="remove('nodes', node._id, $index)">Delete</button>
                             </div>
                         </td>
                     </tr>
