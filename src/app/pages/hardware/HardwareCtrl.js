@@ -10,6 +10,9 @@
 
     /** @ngInject */
     function HardwareCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, ngProgressFactory, API, $rootScope, toastr) {
+        $scope.locations = []
+        $scope.roots = []
+        $scope.nodes = []
         $scope.progressbar = ngProgressFactory.createInstance();
         $scope.progressbar.setColor('#209e91');
         $scope.progressbar.start();
@@ -58,8 +61,19 @@
                     } 
                 });
             } else {
-                toastr.error(res.msg || "Không tìm thấy location", "Lỗi");
-                $scope.progressbar.complete();
+                // toastr.error(res.msg || "Không tìm thấy location", "Lỗi");
+                API.getInfo('nodes', null, function (res) {
+                    if (res.success) {
+                        $scope.nodes = res.data;
+                        $scope.currentNode = $scope.nodes[0];
+                        $rootScope.nodes = $scope.nodes;
+                        $scope.progressbar.complete();
+                    } else {
+                        toastr.error(res.msg || "Không tìm thấy node", "Lỗi");
+                        $scope.progressbar.complete();
+                    }
+                });
+                // $scope.progressbar.complete();
             }
         });
 
@@ -79,7 +93,9 @@
                 e.preventDefault();
                 toastr.warning("Không được bỏ trống tên " + type +"!");
             }
-            if ('node' == type && !!!hw.rootId) hw.lid = $scope.currentLocation._id
+            if ('node' == type && !!!hw.rootId && !!$scope.currentLocation) hw.lid = $scope.currentLocation._id
+            if ('sensor' == type) hw.nodeId = document.getElementById('select_node').value
+            // console.log(hw)
             API.save(type + 's', hw, function(res) {
                 if (!res.data.success) return toastr.error(res.data.msg);
                 toastr.success("Thêm " + type + " " + hw.name + " thành công!");
@@ -104,6 +120,7 @@
         }
 
         $scope.remove = function (type, id, index) {
+            // console.log(type, id, index)
             if (!id) return $scope[type].splice(index, 1);
             var ok = confirm('Bạn có chắc chắn muốn xóa ' + type + ' này');
             if (ok)

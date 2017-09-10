@@ -15,7 +15,7 @@
          </div>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" id="select_node" ng-change="getAllSensors()" ng-model="currentNode">
-               <option ng-repeat="node in nodes track by node._id" value="{{node._id}}" ng-if="node.rootId == currentRoot._id">
+               <option ng-repeat="node in nodes track by node._id" value="{{node._id}}" ng-if="!node.rootId || node.rootId == currentRoot._id">
                   {{node.name}}
                </option>
             </select>
@@ -30,7 +30,7 @@
    <div class="widgets">
     <div class="row">
         <div class="col-md-12">
-            <div ba-panel ba-panel-title="Thông tin các Root khu vực {{currentLoc.name}}" ba-panel-class="with-scroll">
+            <div ba-panel ba-panel-title="Thông tin các Sensor khu vực {{currentLoc.name}}" ba-panel-class="with-scroll">
                 <div class="add-row-editable-table">
                     <button class="btn btn-primary" ng-click="addSensorsRow()"> Thêm sensor </button>
                 </div>
@@ -46,10 +46,10 @@
                         <td>
                             {{$index + 1}}
                         </td>
-                        <td><span editable-text="node.name" blur="cancel" field="name" e-required> {{node.name ? node.name : 'tên node'}} </span></td>
+                        <td><span editable-text="node.name" blur="cancel" field="name" e-required> {{node.name ? node.name : 'tên sensor'}} </span></td>
                         <td><span editable-text="node.description" blur="cancel" field="description"> {{node.description ? node.description : 'mô tả'}} </span></td>
                         <td>
-                            <span editable-select="node.type" blur="cancel" field="type" e-ng-options="s for s in [1,2,3]"> {{node.type ? node.type : 'Cảm biến'}} </span>
+                            <span editable-select="node.type" blur="cancel" field="type" e-ng-options="s for s in [0,1,2]"> {{node.type != null ? node.type : 'Cảm biến'}} </span>
                         </td>
                         <td>
                             <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline"
