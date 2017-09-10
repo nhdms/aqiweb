@@ -1,6 +1,7 @@
+<input type="hidden"  id="device-type" value="nodes">
 <div class="row" node-directive>
     <div class="col-xlg-1 col-md-2 col-sm-1">
-        <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc">
+        <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc" ng-change="getAllNodes()">
             </select>
     </div>
 </div>

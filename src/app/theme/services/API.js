@@ -41,6 +41,16 @@
             }
         }
 
+        this.getChildInfo = function (type, parent, value, cb) {
+            if (this.types.indexOf(type) != -1) {
+                var url = this.baseURL + '/' + type + '/info' + ((null == value) ? '' : '?' + parent + 'Id=' + value);
+                $http.get(url)
+                    .then(function (response) {
+                        cb(response.data);
+                    })
+            }
+        }
+
         this.findAllInItems = function (id, items, type) {
             try {
                 return items.filter(function (item) {
@@ -100,6 +110,27 @@
                         cb(response.data.data, response.data.pages);
                     else alert(response.data.msg);
                 });
+        }
+
+        this.update = function (type, obj, cb) {
+            var url = this.baseURL + '/' + type + '/';
+            $http.put(url, obj).then(function (res) {
+                return cb(res);
+            });
+        }
+
+        this.remove = function (type, id, cb) {
+            var url = this.baseURL + '/' + type + '?id=' + id;
+            $http.delete(url).then(function (err, res) {
+                return cb(err, res);
+            });
+        }
+
+        this.save = function (type, obj, cb) {
+            var url = this.baseURL + '/' + type;
+            $http.post(url, obj).then(function (response) {
+                cb(response)
+            });
         }
         return this;
     }

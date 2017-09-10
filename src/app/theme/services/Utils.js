@@ -288,7 +288,7 @@
         }
 
         this.getSafeRange = function (type) {
-            return (1 == type) ? [26, 32] : (2 == type) ? [2 , 5] : [40 - 70];
+            return (1 == type) ? [26, 32] : (2 == type) ? [2 , 5] : [40, 70];
         }
         return this;
     }

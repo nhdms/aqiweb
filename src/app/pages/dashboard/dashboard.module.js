@@ -222,7 +222,11 @@
       });
   }
 
-  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, Socket, $rootScope) {
+  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, Socket, $rootScope, ngProgressFactory) {
+    $scope.progressbar = ngProgressFactory.createInstance();
+    $scope.progressbar.setColor('#209e91');
+    $scope.progressbar.start();    
+    
     if (!Socket.socket || !Socket.socket.connected) Socket.connect();
     API.getInfo('locations', null, function (res) {
       if (res.success) {
@@ -239,17 +243,21 @@
                 // $scope.currentNode = $scope.nodes[0];
                 $scope.tempNodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
                 $scope.currentNode = $scope.tempNodes[0];
-                $rootScope.nodes = $scope.nodes;                
+                $rootScope.nodes = $scope.nodes;
+                $scope.progressbar.complete();           
               } else {
                 toastr.error(res.msg, "Lỗi");
+                $scope.progressbar.complete();
               }
             });
           } else {
             toastr.error(res.msg, "Lỗi");
+            $scope.progressbar.complete();
           }
         });
       } else {
         toastr.error(res.msg, "Lỗi");
+        $scope.progressbar.complete();
       }
     });
 
@@ -279,8 +287,8 @@
       var options = {
         dataDateFormat: "JJ:NN:SS",
         axis: [
-          { title: 'Nhiệt độ/Độ ẩm', position: "left" },
-          { title: 'AQI', position: "right" }
+          { title: 'AQI', position: "left" },
+          { title: 'Nhiệt độ/Độ ẩm', position: "right" }
         ],
         graphs: [{
           valueAxis: 'v1',

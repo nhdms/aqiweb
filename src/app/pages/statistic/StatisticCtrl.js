@@ -9,10 +9,9 @@
         .controller('StatisticCtrl', StatisticCtrl);
 
     /** @ngInject */
-    function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, $rootScope, API) {
-        $scope.getInfo = function (page) {
-
-        }
+    function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, $rootScope, API, ngProgressFactory) {
+        $scope.progressbar = ngProgressFactory.createInstance();
+        $scope.progressbar.setColor('#209e91');
 
         $scope.btnStatistic = function (type) {
             // console.log();
@@ -21,11 +20,13 @@
                 nodeId: document.getElementById('select_node').value,
                 date: $scope.datePicker.dt.getTime()
             }
+            var ok = 0;
             // var hum = obj, aqi = obj, temp = 
             // console.log(Utils.generateChartData(0,3));
-
+            $scope.progressbar.start();
             API.getData(obj, 3, function (response) {
                 // if (response.data.success) 
+                ok++;
                 var range = Utils.getSafeRange(3);
                 var values = response.map(function (item) {
                     item.ok1 = range[0];
@@ -34,6 +35,7 @@
                     item.ok2 = range[1];
                     return item;
                 });
+                if (ok === 3) $scope.progressbar.complete();
                 AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getHumChartOptions(values)));
 
             });
@@ -41,6 +43,7 @@
             API.getData(obj, 1, function (response) {
                 // console.log(response)
                 // if (response.data.success)
+                ok++;
                 var range = Utils.getSafeRange(1);
                 var values = response.map(function (item) {
                     item.ok1 = range[0];
@@ -50,6 +53,8 @@
                 });
                 // console.log(values[0], Utils.generateChartData(20,30)[0])
                 // var opts = 
+                if (ok === 3) $scope.progressbar.complete();
+
                 AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getTempChartOptions(values)));
 
             });
@@ -57,6 +62,7 @@
             API.getData(obj, 2, function (response) {
                 // console.log(response)
                 // if (response.data.success)
+                ok++;
                 var range = Utils.getSafeRange(2);
                 var values = response.map(function (item) {
                     item.ok1 = range[0];
@@ -66,13 +72,14 @@
                     return item;
                 });
                 AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getAqiChartOptions(values)));
-
+                if (ok === 3) $scope.progressbar.complete();
             });
             //    var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
             //             var chart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(aqi));
         }
 
         $scope.dailyStatistic = function () {
+            $scope.progressbar.start();
             var sensor = document.getElementById('select_sensor');
             var type = +sensor.options[sensor.selectedIndex].getAttribute('type');
             // console.log();
@@ -97,6 +104,7 @@
                 opts.dataDateFormat = "YYYY-MM-DD";
                 opts.minPeriod = "DD";
                 AmCharts.makeChart('div-chart', Utils.buildChartOptions(opts));
+                $scope.progressbar.complete();
 
             });
             // var opts = (1 == type) ? Utils.getTempChartOptions()
@@ -105,7 +113,7 @@
         $scope.pageLength = 0;
 
         $scope.tableStatistic = function (page) {
-            console.log(page);
+            $scope.progressbar.start();
             $scope.currentPage = page;
             var sensor = document.getElementById('select_sensor');
             // console.log();
@@ -135,6 +143,7 @@
                 $scope.pages = Array(len).fill().map(function (x, i) {
                     return i + start;
                 });
+                $scope.progressbar.complete();
                 // }
             })
         }
@@ -166,8 +175,13 @@
         }
 
         // Form
-        if ($rootScope.nodes) {
+        var loaded = 0;
+        $scope.progressbar.start();
+        if ($rootScope.nodes && $rootScope.nodes.length > 0) {
             $scope.nodes = $rootScope.nodes;
+            $scope.currentNode = $scope.nodes[0];
+            loaded++;
+            if (loaded == 2) $scope.progressbar.complete();
         } else {
             API.getInfo('nodes', null, function (res) {
                 if (res.success) {
@@ -175,46 +189,59 @@
                     $scope.currentNode = $scope.nodes[1];
                     $rootScope.nodes = $scope.nodes;
                 }
+                if (loaded == 2) $scope.progressbar.complete();
             });
         }
 
         API.getInfo('sensors', null, function (res) {
-            // console.log(res)
+            loaded++;
+            if (loaded == 2) $scope.progressbar.complete();            
             if (res.success) {
                 $scope.sensors = res.data;
                 $scope.currentSensor = $scope.sensors[0];
                 $rootScope.sensors = $scope.sensors;
             }
         });
+
+        $scope.harmStatistic = function(page) {
+            $scope.progressbar.start();
+            $scope.currentPage = +page;
+            var sensor = document.getElementById('select_sensor');
+            var type = +sensor.options[sensor.selectedIndex].getAttribute('type');
+            
+            // console.log();
+            var obj = {
+                start: $scope.datePicker.dt.getTime(),
+                end: $scope.datePicker.dt2.getTime(),
+                nodeId: document.getElementById('select_node').value,
+                sensorId: sensor.value,
+                page: page,
+                range : Utils.getSafeRange(type).join(',')
+            };
+
+            // $scope.currentPage = obj.page;
+            API.getTableData(obj, function (data, pages) {
+                // console.log(data, pages)
+                $scope.pageLength = pages;
+                data = data.map(function (i) {
+                    i.unit = (1 == i.type ? '°C' : (3 == i.type) ? '%' : '');
+                    var range = Utils.getSafeRange(i.type);
+                    i.status = (i.value < range[0] || i.value > range[1] ? 'app/status/bad.png' : 'app/status/ok.png');
+                    return i;
+                });
+                $scope.items = data;
+                // $scope.pages = createPagesArray(obj.page);
+                // if ($scope.pageLength - $scope.currentPage >= 7) {
+                var start = ($scope.pageLength - $scope.currentPage >= 7 ? $scope.currentPage : $scope.pageLength - 7);
+                var len = $scope.pageLength > 7 ? 7 : $scope.pageLength;
+                $scope.pages = Array(len).fill().map(function (x, i) {
+                    return i + start;
+                });
+                $scope.progressbar.complete();
+                // }
+            })
+        }
     }
-
-    app.directive('hourDirective', function (API, $timeout, baConfig, Utils) {
-        return {
-            restrict: 'A',
-            link: function (scope, element, attrs) {
-            }
-        };
-    });
-
-    app.directive('dateDirective', function (API, $timeout, baConfig, Utils) {
-        return {
-            restrict: 'A',
-            link: function ($scope, element, attrs) {
-                $scope.opened = false;
-                $scope.opened2 = false;
-            }
-        };
-    });
-
-    app.directive('tableDirective', function (API, $timeout, baConfig, Utils) {
-        return {
-            restrict: 'A',
-            link: function ($scope, element, attrs) {
-                $timeout(function () {
-                }, 0);
-            }
-        };
-    });
 
     app.directive('harmDirective', function (API, $timeout, baConfig, Utils) {
         return {

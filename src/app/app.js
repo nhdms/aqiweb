@@ -13,8 +13,10 @@ angular.module('BlurAdmin', [
   'ngJsTree',
   'angular-progress-button-styles',
   'pascalprecht.translate',
+  // 'ngprogress',
   'BlurAdmin.theme',
-  'BlurAdmin.pages'
+  'BlurAdmin.pages',
+  'ngProgress'
 ]).config(function ($translateProvider) {
   
 
@@ -32,5 +34,5 @@ angular.module('BlurAdmin', [
   // $translateProvider.fallbackLanguage('vi');
   $translateProvider.preferredLanguage('vi');
 })
-  .value('SocketURL', 'http://52.77.255.219')
-  .value('APIURL', 'http://localhost:8081');
+  .value('SocketURL', 'http://localhost:8080')
+  .value('APIURL', 'http://localhost:8080');
