@@ -2,7 +2,8 @@
 <div class="row" node-directive>
     <div class="col-xlg-1 col-md-2 col-sm-1">
         <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc" ng-change="getAllNodes()">
-            </select>
+                <option value="" disabled selected>Chọn khu vực</option>                                    
+        </select>
     </div>
 </div>
 <div class="row" style="margin-top:20px"></div>

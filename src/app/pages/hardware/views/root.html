@@ -1,6 +1,7 @@
 <div class="row" root-directive>
         <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc">
+                    <option value="" disabled selected>Chọn khu vực</option>                                        
             </select>
         </div>
     </div>

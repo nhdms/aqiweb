@@ -13,7 +13,8 @@
 
             <div class="col-xlg-1 col-md-2 col-sm-1">
                 <select id="select_node" class="form-control" data-ng-model="currentNode" data-ng-options="node as node.name for node in nodes track by node._id">
-            </select>
+                        <option value="" disabled selected>Chọn node</option>                        
+                </select>
             </div>
 
             <div class="col-xlg-1 col-md-2 col-sm-1">

@@ -9,12 +9,12 @@
         .controller('HardwareCtrl', HardwareCtrl);
 
     /** @ngInject */
-    function HardwareCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, ngProgressFactory, API, $rootScope, toastr) {
+    function HardwareCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, ngProgressFactory,PROGRESSBAR_COLOR, API, $rootScope, toastr) {
         $scope.locations = []
         $scope.roots = []
         $scope.nodes = []
         $scope.progressbar = ngProgressFactory.createInstance();
-        $scope.progressbar.setColor('#209e91');
+        $scope.progressbar.setColor(PROGRESSBAR_COLOR);
         $scope.progressbar.start();
         $scope.sensors = [];
         $scope.type = 'sensors';

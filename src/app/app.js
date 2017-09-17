@@ -34,6 +34,7 @@ angular.module('BlurAdmin', [
   // $translateProvider.fallbackLanguage('vi');
   $translateProvider.preferredLanguage('vi');
 })
+  .value('PROGRESSBAR_COLOR', '#FF0000')
   .value('SocketURL', 'http://203.162.131.246:5000')
   .value('APIURL', 'http://203.162.131.246:8080');
   // .value('SocketURL', 'http://localhost:5000')

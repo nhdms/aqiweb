@@ -21,10 +21,12 @@
          </div>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" id="select_node" ng-options="node as node.name for node in nodes track by node._id" ng-model="currentNode">
+                    <option value="" disabled selected>Chọn node</option>                    
             </select>
          </div>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" id="select_sensor">
+                    <option value="" disabled selected>Chọn sensor</option>
                <option ng-repeat="sensor in sensors track by $index" value="{{sensor.type}}" ng-if="sensor.node == currentNode.id">
                   {{sensor.name}}
                </option>

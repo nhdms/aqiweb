@@ -9,9 +9,9 @@
         .controller('ReportCtrl', ReportCtrl);
 
     /** @ngInject */
-    function ReportCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, API, ngProgressFactory) {
+    function ReportCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, API, ngProgressFactory, PROGRESSBAR_COLOR) {
         $scope.progressbar = ngProgressFactory.createInstance();
-        $scope.progressbar.setColor('#209e91');
+        $scope.progressbar.setColor(PROGRESSBAR_COLOR);
         $scope.progressbar.start();
         $scope.datePicker = {
             dt: new Date(),

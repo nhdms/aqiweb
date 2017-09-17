@@ -94,13 +94,13 @@
                     // cb(response);
                     // console.log(response)
                     if (response.data.success){
-                        var keys = response.data.data.map((i) =>{ return i._id})
-                        var a = [...Array(24).keys()].map((i)=> {
+                        var keys = response.data.data.map(function(i){ return i._id})
+                        var a = [...Array(24).keys()].map(function(i){
                             if (keys.indexOf(i) === -1) response.data.data.push({_id: i, date: new Date(obj.date), min: 0, max:0, avg: 0})
                         })
-                        cb(response.data.data)                        
+                        cb(null, response.data.data)                        
                     }
-                    else alert(response.data.msg);
+                    else cb(response.data.msg);
                 });
         }
 
@@ -109,8 +109,8 @@
                 .then(function (response) {
                     // cb(response);
                     if (response.data.success)
-                        cb(response.data.data)
-                    else alert(response.data.msg);
+                        cb(null, response.data.data)
+                    else cb(response.data.msg);
                 });
         }
 
@@ -120,8 +120,8 @@
                 .then(function (response) {
                     // cb(response);
                     if (response.data.success)
-                        cb(response.data.data, response.data.pages);
-                    else alert(response.data.msg);
+                        cb(null, response.data.data, response.data.pages);
+                    else cb(response.data.msg);
                 });
         }
 

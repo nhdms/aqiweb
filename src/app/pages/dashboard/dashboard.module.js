@@ -222,9 +222,9 @@
       });
   }
 
-  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr , $rootScope, ngProgressFactory, SocketURL) {
+  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr , $rootScope, ngProgressFactory, SocketURL, PROGRESSBAR_COLOR) {
     $scope.progressbar = ngProgressFactory.createInstance();
-    $scope.progressbar.setColor('#209e91');
+    $scope.progressbar.setColor(PROGRESSBAR_COLOR);
     $scope.progressbar.start();
 
     if (!$scope.socket || !$scope.socket.connected) $scope.socket = mqtt.connect(SocketURL);
@@ -233,28 +233,31 @@
         $scope.locations = res.data;
         $scope.currentLocation = $scope.locations[0];
         $rootScope.locations = $scope.locations;
-        API.getInfo('roots', null, function (res) {
-          if (res.success) {
-            $scope.roots = res.data;
-            $rootScope.roots = $scope.roots;            
-            API.getInfo('nodes', null, function (res) {
-              if (res.success) {
-                $scope.nodes = res.data;
-                // $scope.currentNode = $scope.nodes[0];
-                $scope.tempNodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
-                $scope.currentNode = $scope.tempNodes[0];
-                $rootScope.nodes = $scope.nodes;
-                $scope.progressbar.complete();           
-              } else {
-                toastr.error(res.msg, "Lỗi");
-                $scope.progressbar.complete();
-              }
-            });
-          } else {
-            toastr.error(res.msg, "Lỗi");
-            $scope.progressbar.complete();
-          }
-        });
+      } else {
+        toastr.error(res.msg, "Lỗi");
+        $scope.progressbar.complete();
+      }
+    });
+
+
+    API.getInfo('roots', null, function (res) {
+      if (res.success) {
+        $scope.roots = res.data;
+        $rootScope.roots = $scope.roots;
+      } else {
+        toastr.error(res.msg, "Lỗi");
+        $scope.progressbar.complete();
+      }
+    });
+
+    API.getInfo('nodes', null, function (res) {
+      if (res.success) {
+        $scope.nodes = res.data;
+        // $scope.currentNode = $scope.nodes[0];
+        // $scope.nodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
+        $scope.currentNode = $scope.nodes[0];
+        $rootScope.nodes = $scope.nodes;
+        $scope.progressbar.complete();           
       } else {
         toastr.error(res.msg, "Lỗi");
         $scope.progressbar.complete();
@@ -268,9 +271,9 @@
     }
 
     $scope.changeLocation = function(id) {
-      $scope.tempNodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
+      $scope.nodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
       try {
-        $scope.currentNode = $scope.tempNodes[0];         
+        $scope.currentNode = $scope.nodes[0];         
       } catch (e){
         $scope.currentNode = {};
       }

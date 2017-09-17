@@ -2,12 +2,14 @@
   <div class="row">
     <div class="col-xs-6 col-sm-4">
       <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc._id" ng-model="currentLocation" ng-change="changeLocation()">
+        <option value="" disabled selected>Chọn khu vực</option>        
       </select>
     </div>
     <div class="col-xs-6 col-sm-4">
       <div class="form-group">
-        <select class="form-control" ng-options="node as node.name for node in tempNodes track by node._id" ng-model="currentNode"
+        <select class="form-control" ng-options="node as node.name for node in nodes track by node._id" ng-model="currentNode"
           ng-change="changeNode()">
+          <option value="" disabled selected>Chọn node</option>
       </select>
       </div>
     </div>

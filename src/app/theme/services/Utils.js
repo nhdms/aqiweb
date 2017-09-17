@@ -52,12 +52,17 @@
                 },
                 "categoryField": data.categoryField,
                 "categoryAxis": {
-                    "axisColor": layoutColors.defaultText,
-                    "color": layoutColors.defaultText,
-                    "gridColor": layoutColors.defaultText,
+                //     "axisColor": layoutColors.defaultText,
+                //     "color": layoutColors.defaultText,
+                //     "gridColor": layoutColors.defaultText,
                     "parseDates": true,
-                    "dashLength": 1,
-                    "minorGridEnabled": true,
+                //     "dashLength": 1,
+                    "autoGridCount": false,
+                    "gridCount": data.dataProvider.length,
+                //     "minorGridEnabled": true,
+                //     "gridPosition": "start",
+                //     autoWrap:false, 
+                //     minHorizontalGap:0,
                     "minPeriod": data.minPeriod ? data.minPeriod : data.dataDateFormat.slice(-2).toLowerCase(),
                 },
                 "legend": {
@@ -77,6 +82,7 @@
                 pathToImages: layoutPaths.images.amChart
             }
 
+            // alert(data.dataProvider.length)
             for (var i in data.axis) {
                 var obj = data.axis[i];
                 ret.valueAxes.push({

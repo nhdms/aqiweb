@@ -4,17 +4,20 @@
       <form>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc.id" ng-model="currentLoc">
+                <option value="" disabled selected>Chọn khu vực</option>                
             </select>
          </div>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" id="select_root">
-               <option ng-repeat="root in roots track by root._id" value="{{root._id}}" ng-if="root.loc == currentLoc.id" ng-model="currentRoot">
+                <option value="" disabled selected>Chọn root</option>                
+                <option ng-repeat="root in roots track by root._id" value="{{root._id}}" ng-if="root.loc == currentLoc.id" ng-model="currentRoot">
                   {{root.name}}
                </option>
             </select>
          </div>
          <div class="col-xlg-1 col-md-2 col-sm-1">
             <select class="form-control" id="select_node" ng-change="getAllSensors()" ng-model="currentNode">
+                <option value="" disabled selected>Chọn node</option>                    
                <option ng-repeat="node in nodes track by node._id" value="{{node._id}}" ng-if="!node.rootId || node.rootId == currentRoot._id">
                   {{node.name}}
                </option>

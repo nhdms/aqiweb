@@ -9,7 +9,7 @@
         .controller('StatisticCtrl', StatisticCtrl);
 
     /** @ngInject */
-    function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, $rootScope, API, ngProgressFactory) {
+    function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig,toastr, layoutPaths, Utils, $timeout, $rootScope,PROGRESSBAR_COLOR, API, ngProgressFactory) {
         
         $rootScope.$on('$stateChangeStart', 
             function(event, toState, toParams, fromState, fromParams){ 
@@ -18,7 +18,7 @@
             }
         )
         $scope.progressbar = ngProgressFactory.createInstance();
-        $scope.progressbar.setColor('#209e91');
+        $scope.progressbar.setColor(PROGRESSBAR_COLOR);
         if (!$rootScope.safeRange) {
             API.getSafeRange(function (res) {
                 $rootScope.safeRange = res.data
@@ -37,22 +37,26 @@
             // var hum = obj, aqi = obj, temp = 
             // console.log(Utils.generateChartData(0,3));
             $scope.progressbar.start();
-            API.getData(obj, 2, function (response) {
-                // if (response.data.success) 
+            API.getData(obj, 2, function (err, response) {
+                // if (response.data.success)
+                console.log(response) 
                 ok++;
+                if (ok === 3) $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");                
                 var range = $rootScope.safeRange[2];
                 var values = response.map(function (item) {
                     item.date = new Date(new Date(item.date).setHours(item._id));
                     return item;
                 });
-                if (ok === 3) $scope.progressbar.complete();
-                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Độ ẩm', value: values.sort((a,b) => {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
+                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Độ ẩm', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
             });
 
-            API.getData(obj, 0, function (response) {
+            API.getData(obj, 0, function (err, response) {
                 // console.log(response)
                 // if (response.data.success)
                 ok++;
+                if (ok === 3) $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");
                 var range = $rootScope.safeRange[0];
                 var values = response.map(function (item) {
                     // item.ok1 = range[0];
@@ -62,16 +66,17 @@
                 });
                 // console.log(values[0], Utils.generateChartData(20,30)[0])
                 // var opts = 
-                if (ok === 3) $scope.progressbar.complete();
-                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Nhiệt độ', value: values.sort((a,b) => {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
+                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Nhiệt độ', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
                 // AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getTempChartOptions(values)));
 
             });
 
-            API.getData(obj, 1, function (response) {
+            API.getData(obj, 1, function (err, response) {
                 // console.log(response)
                 // if (response.data.success)
                 ok++;
+                if (ok === 3) $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");                
                 var range = $rootScope.safeRange[1];
                 var values = response.map(function (item) {
                     // item.ok1 = range[0];
@@ -81,8 +86,7 @@
                     return item;
                 });
                 // AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getAqiChartOptions(values)));
-                if (ok === 3) $scope.progressbar.complete();
-                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Chỉ số không khí', value: values.sort((a,b) => {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
+                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Chỉ số không khí', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
             });
             //    var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
             //             var chart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(aqi));
@@ -99,12 +103,14 @@
                 type: type
             }
 
-            API.getMonthData(obj, function (data) {
+            API.getMonthData(obj, function (err, data) {
+                $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");                
                 data = data.map(function (i) {
                     i.date = new Date(i._id);
                     return i;
                 });
-                console.log(data)
+                // console.log(data)
                 var opts = Utils.getStatisticChartOptions({
                     title: $scope.labels[type],
                     value: data,
@@ -117,8 +123,6 @@
                 opts.dataDateFormat = "YYYY-MM-DD";
                 opts.minPeriod = "DD";
                 AmCharts.makeChart('div-chart', Utils.buildChartOptions(opts));
-                $scope.progressbar.complete();
-
             });
             // var opts = (1 == type) ? Utils.getTempChartOptions()
         }
@@ -141,8 +145,10 @@
             };
 
             // $scope.currentPage = obj.page;
-            API.getTableData(obj, function (data, pages) {
+            API.getTableData(obj, function (err, data, pages) {
                 // console.log(data, pages, $rootScope.safeRange)
+                $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");                
                 $scope.pageLength = pages;
                 data = data.map(function (i) {
                     i.unit = (0 == i.type ? '°C' : (2 == i.type) ? '%' : '');
@@ -161,7 +167,6 @@
                 $scope.pages = Array(len).fill().map(function (x, i) {
                     return i + start;
                 });
-                $scope.progressbar.complete();
                 // }
             })
         }
@@ -194,26 +199,26 @@
 
         // Form
         var loaded = 0;
-        $scope.progressbar.start();
         if ($rootScope.nodes && $rootScope.nodes.length > 0) {
             $scope.nodes = $rootScope.nodes;
             $scope.currentNode = $scope.nodes[0];
             loaded++;
             if (loaded == 2) $scope.progressbar.complete();
         } else {
+            $scope.progressbar.start();        
             API.getInfo('nodes', null, function (res) {
                 if (res.success) {
                     $scope.nodes = res.data;
                     $scope.currentNode = $scope.nodes[1];
                     $rootScope.nodes = $scope.nodes;
                 }
-                if (loaded == 2) $scope.progressbar.complete();
+                $scope.progressbar.complete();
             });
         }
 
+        $scope.progressbar.start();                
         API.getInfo('sensors', null, function (res) {
-            loaded++;
-            if (loaded == 2) $scope.progressbar.complete();
+            $scope.progressbar.complete();
             if (res.success) {
                 $scope.sensors = res.data;
                 $scope.currentSensor = $scope.sensors[0];
@@ -241,8 +246,10 @@
             // $scope.currentPage = obj.page;
             // console.log(obj)
             // alert()
-            API.getTableData(obj, function (data, pages) {
+            API.getTableData(obj, function (err, data, pages) {
                 // console.log(data, pages)
+                $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");                
                 $scope.pageLength = pages;
                 data = data.map(function (i) {
                     i.unit = (0 == i.type ? '°C' : (2 == i.type) ? '%' : '');
@@ -257,48 +264,8 @@
                 $scope.pages = Array(len).fill().map(function (x, i) {
                     return i + start;
                 });
-                $scope.progressbar.complete();
                 // }
             })
         }
     }
-
-    app.directive('harmDirective', function (API, $timeout, baConfig, Utils) {
-        return {
-            restrict: 'A',
-            link: function ($scope, element, attrs) {
-                // $timeout(function () {
-                //     $scope.items = [
-                //         {
-                //             status: 'app/status/bad.png',
-                //             timeExec: '2017-03-03 17:30:10.0',
-                //             timeUpload: '2017-03-03 17:30:10.0',
-                //             value: 28,
-                //             unit: '°C',
-                //             sensor: 'Temperature DHT Sensor',
-                //             node: {
-                //                 id: 'n1',
-                //                 name: 'Node RDC'
-                //             }
-                //         },
-                //         {
-                //             status: 'app/status/bad.png',
-                //             timeExec: '2017-03-03 17:30:10.0',
-                //             timeUpload: '2017-03-03 17:30:10.0',
-                //             value: 28,
-                //             unit: '°C',
-                //             sensor: 'Temperature DHT Sensor',
-                //             node: {
-                //                 id: 'n1',
-                //                 name: 'Node RDC'
-                //             }
-                //         }
-                //     ]
-
-                //     $scope.pages = new Array(5);
-                //     $scope.currentPage = 0;
-                // }, 0);
-            }
-        };
-    });
 })();
