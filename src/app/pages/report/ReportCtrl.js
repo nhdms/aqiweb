@@ -9,8 +9,10 @@
         .controller('ReportCtrl', ReportCtrl);
 
     /** @ngInject */
-    function ReportCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, API, ngProgressFactory, PROGRESSBAR_COLOR) {
+    function ReportCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, API, ngProgressFactory, toastr, PROGRESSBAR_COLOR) {
         $scope.progressbar = ngProgressFactory.createInstance();
+        $scope.dailyReport = []
+        $scope.weeklyReport = []
         $scope.progressbar.setColor(PROGRESSBAR_COLOR);
         $scope.progressbar.start();
         $scope.datePicker = {
@@ -27,64 +29,69 @@
         }
         $scope.onChange = function () {
             var start = new Date($scope.datePicker.dt);
-            $scope.dfrom = start.toLocaleDateString();
+            $scope.dfrom = start.toISOString()
             var nextWeek = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
-            $scope.dto = nextWeek.toLocaleDateString();
+            $scope.dto = nextWeek.toISOString()
+            var st = start.setHours(0, 0, 0, 0),
+                end = nextWeek.setHours(23, 59, 59, 999)
+            $scope.progressbar.start();        
+            API.getReport(st, end, function (data) {
+                // console.log(data.data.length ==)
+                $scope.progressbar.complete()
+                if (data.data.length === 0) {
+                    $scope.weeklyReport = []
+                    return toastr.success("Chưa có dữ liệu cho ngày này")
+                }
+                $scope.weeklyReport = data.data;
+                // console.log($scope.dailyReport)
+            })
         }
         $scope.onChange();
-        $scope.dailyReport = function () {
-            var ok = 0;
-            API.getData(obj, 3, function (response) {
-                // if (response.data.success) 
-                ok++;
-                var range = Utils.getSafeRange(3);
-                var values = response.map(function (item) {
-                    item.ok1 = range[0];
-                    item.date = new Date(new Date(item.date).setHours(item._id));
-                    // item.date = new Date(item.date)
-                    item.ok2 = range[1];
-                    return item;
-                });
-                if (ok === 3) $scope.progressbar.complete();
-                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getHumChartOptions(values)));
 
-            });
-
-            API.getData(obj, 1, function (response) {
-                // console.log(response)
-                // if (response.data.success)
-                ok++;
-                var range = Utils.getSafeRange(1);
-                var values = response.map(function (item) {
-                    item.ok1 = range[0];
-                    item.date = new Date(new Date(item.date).setHours(item._id));
-                    item.ok2 = range[1];
-                    return item;
-                });
-                // console.log(values[0], Utils.generateChartData(20,30)[0])
-                // var opts = 
-                if (ok === 3) $scope.progressbar.complete();
-
-                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getTempChartOptions(values)));
-
-            });
-
-            API.getData(obj, 2, function (response) {
-                // console.log(response)
-                // if (response.data.success)
-                ok++;
-                var range = Utils.getSafeRange(2);
-                var values = response.map(function (item) {
-                    item.ok1 = range[0];
-                    item.ok2 = range[1];
-                    item.date = new Date(new Date(item.date).setHours(item._id));
-                    // item.date = new Date(item.date)
-                    return item;
-                });
-                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getAqiChartOptions(values)));
-                if (ok === 3) $scope.progressbar.complete();
-            });
+        $scope.ondateChanged = function () {
+            var date = new Date($scope.datePicker.dt),
+                start = date.setHours(0, 0, 0, 0),
+                end = date.setHours(23, 59, 59, 999)
+            $scope.progressbar.start();        
+            API.getReport(start, end, function (data) {
+                // console.log(data.data.length ==)
+                $scope.progressbar.complete()
+                if (data.data.length === 0) {
+                    $scope.dailyReport = []
+                    return toastr.success("Chưa có dữ liệu cho ngày này")
+                }
+                $scope.dailyReport = data.data;
+                // console.log($scope.dailyReport)
+            })
         }
+
+        $scope.dateChanged = alert
+        if ($scope.dailyReport.length === 0) {
+            var start = (new Date()).setHours(0, 0, 0, 0) - 24 * 60 * 1000,
+                end = (new Date()).setHours(23, 59, 59, 999) - 24 * 60 * 1000
+            // console.log(start)
+            API.getReport(start, end, function (data) {
+                $scope.progressbar.complete()
+                // console.log(data.data.length ==)
+                if (data.data.length === 0) return; //toastr.success("Chưa có dữ liệu cho ngày này")
+                $scope.dailyReport = data;
+            })
+        }
+
+        if ($scope.weeklyReport.length === 0) {
+            var start = (new Date()).setHours(0, 0, 0, 0) - 7 * 24 * 60 * 60 * 1000,
+                end = (new Date()).setHours(23, 59, 59, 999) - 24 * 60 * 60 * 1000
+            API.getReport(start, end, function (data) {
+                // console.log(data.data.length ==)
+                // console.log(data)
+                $scope.progressbar.complete()
+                if (data.data.length === 0) return; //toastr.success("Chưa có dữ liệu cho ngày này")
+                $scope.weeklyReport = data;
+
+            })
+        }
+
+
     }
     app.directive('dateReport', function (API, $timeout, baConfig, Utils) {
         return {

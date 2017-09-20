@@ -1,0 +1,77 @@
+<div ui-view autoscroll="true" autoscroll-body-top>
+    <div class="container">
+        <div ng-repeat="new in news track by $index">
+            <div class="col-md-10 blogShort">
+                <h6>{{new.title}}</h6>
+                <!-- <em>This snippet use <a href="http://bootsnipp.com/snippets/featured/sexy-sidebar-navigation" target="_blank">Sexy Sidebar Navigation</a></em> -->
+                <article>
+                    <p>
+                        {{new.content}}
+                    </p>
+                </article>
+                <!-- <a class="btn btn-blog pull-right marginBottom10" href="{{}}">READ MORE</a>  -->
+            </div>
+            <div class="row" style="margin-top:30px"></div>
+        </div>
+
+        <center>
+            <style type="text/css">
+            table.infoaqitable {
+                    margin: 0px;
+                }
+
+                table.infoaqitable td {
+                    padding: 5px;
+                }
+            }
+            </style>
+
+            <table class="infoaqitable" width="100%">
+                <thead>
+                    <tr>
+                        <td width="70">AQI</td>
+                        <td width="130">Chất lượng</td>
+                        <td>Ảnh hưởng sức khỏe</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background-color:#00a065;color:white;">
+                        <td>0-50</td>
+                        <td>Tốt</td>
+                        <td>Không ảnh hưởng đến sức khỏe</td>
+                    </tr>
+                    <tr style="background-color:#ffe200;">
+                        <td>51-100</td>
+                        <td>Trung bình</td>
+                        <td>Air quality is acceptable; however, for some pollutants there may be a moderate health concern for
+                            a very small number of people. For example, people who are unusually sensitive to ozone may experience
+                            respiratory symptoms.</td>
+                    </tr>
+                    <tr style="background-color:#ff9400;color:white;">
+                        <td>101-150</td>
+                        <td>Kém</td>
+                        <td>Unhealthy for sensitive groups: members of sensitive groups may experience health effects. The general
+                            public is not likely to be affected.</td>
+                    </tr>
+                    <tr style="background-color:#e10016;color:white;">
+                        <td>151-200</td>
+                        <td>Xấu</td>
+                        <td>Unhealthy: everyone may begin to experience health effects; members of sensitive groups may experience
+                            more serious health effects</td>
+                    </tr>
+                    <tr style="background-color:#74009f;color:white;">
+                        <td>201-300</td>
+                        <td>Rất xấu</td>
+                        <td>Very unhealthy: health warnings of emergency conditions. The entire population is more likely to
+                            be affected.</td>
+                    </tr>
+                    <tr style="background-color:#8b0017;color:white;">
+                        <td>300+</td>
+                        <td>Nguy hại</td>
+                        <td>Hazardous: Health alert: everyone may experience more serious health effects</td>
+                    </tr>
+                </tbody>
+            </table>
+        </center>
+    </div>
+</div>

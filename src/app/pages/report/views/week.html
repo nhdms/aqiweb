@@ -12,12 +12,12 @@
                 </div>
             </div>
             <div class="col-xlg-1 col-md-2 col-sm-1">
-                <button type="button" class="btn btn-info btn-icon"><i class="ion-stats-bars"></i></button>
+                <!-- <button type="button" class="btn btn-info btn-icon"><i class="ion-stats-bars"></i></button> -->
             </div>
         </form>
     </div>
     <div class="row">
-        <h3 class="text-center title"> TỪ {{dfrom}} ĐẾN {{dto}}</h3>
+        <h3 class="text-center title"> TỪ {{dfrom | date: 'dd-MM-yyyy'}} ĐẾN {{dto | date: 'dd-MM-yyyy'}}</h3>
     </div>
     <div class="row">
         <div ba-panel ba-panel-title="" ba-panel-class="with-scroll table-panel">
@@ -38,26 +38,26 @@
                         <tr class="no-top-border">
                             <td class="align-right"> Nhiệt độ </td>
                             <!--<td class="table-arr"><i ng-class="{'icon-up': item.isVisitsUp, 'icon-down': !item.isVisitsUp }"></i></td>-->
-                            <td class="align-right">{{reports.temp.min.value}} / {{reports.temp.min.time}}</td>
-                            <td class="align-right">{{reports.temp.avg.value}} / {{reports.temp.avg.time}}</td>
-                            <td class="align-right">{{reports.temp.max.value}} / {{reports.temp.max.time}}</td>
+                            <td class="align-right">{{weeklyReport[0][0]._id.value}} / {{weeklyReport[0][0].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right">{{weeklyReport[0][1]._id.value}} / {{weeklyReport[0][1].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right">{{weeklyReport[0][2]._id.value}} / {{weeklyReport[0][2].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
                             <td class="align-right"> 26°C - 30°C </td>
                         </tr>
                         <tr class="no-top-border">
                             <td class="align-right"> Độ ẩm </td>
                             <!--<td class="table-arr"><i ng-class="{'icon-up': item.isVisitsUp, 'icon-down': !item.isVisitsUp }"></i></td>-->
-                            <td class="align-right">{{reports.hum.min.value}} / {{reports.hum.min.time}}</td>
-                            <td class="align-right">{{reports.hum.avg.value}} / {{reports.hum.avg.time}}</td>
-                            <td class="align-right">{{reports.hum.max.value}} / {{reports.hum.max.time}}</td>
-                            <td class="align-right"> 70% - 80% </td>
+                            <td class="align-right">{{weeklyReport[2][0]._id.value}} / {{weeklyReport[2][0].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right">{{weeklyReport[2][1]._id.value}} / {{weeklyReport[2][1].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right">{{weeklyReport[2][2]._id.value}} / {{weeklyReport[2][2].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right"> 40% - 70% </td>
                         </tr>
                         <tr class="no-top-border">
                             <td class="align-right"> Chất lượng không khí </td>
                             <!--<td class="table-arr"><i ng-class="{'icon-up': item.isVisitsUp, 'icon-down': !item.isVisitsUp }"></i></td>-->
-                            <td class="align-right">{{reports.aqi.min.value}} / {{reports.aqi.min.time}}</td>
-                            <td class="align-right">{{reports.aqi.avg.value}} / {{reports.aqi.avg.time}}</td>
-                            <td class="align-right">{{reports.aqi.max.value}} / {{reports.aqi.max.time}}</td>
-                            <td class="align-right"> </td>
+                            <td class="align-right">{{weeklyReport[1][0]._id.value}} / {{weeklyReport[1][0].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right">{{weeklyReport[1][1]._id.value}} / {{weeklyReport[1][1].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right">{{weeklyReport[1][2]._id.value}} / {{weeklyReport[1][2].time  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
+                            <td class="align-right"> 0 - 2 </td>
                         </tr>
                     </tbody>
                 </table>

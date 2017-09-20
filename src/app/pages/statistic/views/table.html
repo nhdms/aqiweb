@@ -61,9 +61,9 @@
                   <tbody>
                      <tr ng-repeat="item in items track by $index" class="no-top-border">
                         <td ng-class="nowrap">{{$index + 1}}</td>
-                        <td class="align-right">{{item.created}}</td>
+                        <td class="align-right">{{item.created  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
                         <!--<td class="table-arr"><i ng-class="{'icon-up': item.isVisitsUp, 'icon-down': !item.isVisitsUp }"></i></td>-->
-                        <td class="align-right">{{item.received}}</td>
+                        <td class="align-right">{{item.received  | date:'dd-MM-yyyy HH:mm:ss'}}</td>
                         <td class="align-right">{{item.value}}</td>
                         <!--<td class="table-arr"><i ng-class="{'icon-up': item.isPurchasesUp, 'icon-down': !item.isPurchasesUp }"></i></td>-->
                         <td class="align-right">{{item.unit}}</td>

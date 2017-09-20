@@ -13,6 +13,7 @@
     'BlurAdmin.pages.hardware',
     'BlurAdmin.pages.location',
     'BlurAdmin.pages.users',
+    'BlurAdmin.pages.news'
   ])
       .config(routeConfig);
 

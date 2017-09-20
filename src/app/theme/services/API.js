@@ -95,7 +95,7 @@
                     // console.log(response)
                     if (response.data.success){
                         var keys = response.data.data.map(function(i){ return i._id})
-                        var a = [...Array(24).keys()].map(function(i){
+                        var a = [Array(24).keys()].map(function(i){
                             if (keys.indexOf(i) === -1) response.data.data.push({_id: i, date: new Date(obj.date), min: 0, max:0, avg: 0})
                         })
                         cb(null, response.data.data)                        
@@ -151,6 +151,14 @@
             $http.get(url)
             .then(function (response) {
                 cb(response.data);
+            })
+        }
+
+        this.getReport = function(start, end, cb) {
+            var url = this.baseURL + `/data/report?start=${start}&end=${end}`
+            $http.get(url)
+            .then(function(response) {
+                cb(response.data)
             })
         }
 
