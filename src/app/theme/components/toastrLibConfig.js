@@ -23,5 +23,6 @@
       preventOpenDuplicates: false,
       target: 'body'
     });
+    // ok
   }
 })();
