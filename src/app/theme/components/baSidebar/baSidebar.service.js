@@ -20,10 +20,21 @@
         var isMenuCollapsed = shouldMenuBeCollapsed();
 
         this.getMenuItems = function() {
-          var states = defineMenuItemStates();
+          var user = {},
+          defaultRoles = ['guest']
+          try {
+            user = JSON.parse(localStorage.getItem('currentUser'))
+            defaultRoles = defaultRoles.concat(user.roles)
+          } catch(e) {
+            defaultRoles = ['guest']
+          }
+          var states = defineMenuItemStates()
           // console.log(states);
           var menuItems = states.filter(function(item) {
-            return item.level == 0;
+            if (item.level !== 0) return false
+            if (!item.role) item.role = 'guest'
+            // console.log(defaultRoles, item, defaultRoles.indexOf(item.role) > -1 && item.level == 0)
+            return defaultRoles.indexOf(item.role) > -1 && item.level == 0;
           });
 
           menuItems.forEach(function(item) {
@@ -80,6 +91,7 @@
                   order: meta.order,
                   icon: meta.icon,
                   stateRef: s.name,
+                  role: s.role
                 };
               })
               .sort(function(a, b) {

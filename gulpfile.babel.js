@@ -2,7 +2,7 @@
 
 var gulp = require('gulp');
 var wrench = require('wrench');
-
+var babel = require('gulp-babel');
 /**
  *  This will load all js or coffee files in the gulp directory
  *  in order to load all gulp tasks
@@ -19,5 +19,5 @@ wrench.readdirSyncRecursive('./gulp').filter(function(file) {
  *  main optimization build task
  */
 gulp.task('default', ['clean'], function () {
-  gulp.start('build');
+  gulp.pipe(babel()).start('build');
 });

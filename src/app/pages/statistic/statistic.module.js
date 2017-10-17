@@ -14,7 +14,8 @@
         sidebarMeta: {
           icon: 'ion-stats-bars',
           order: 150,
-        }
+        },
+        role: 'user'
       })
       .state('statistic.hour', {
           url: '/hour',

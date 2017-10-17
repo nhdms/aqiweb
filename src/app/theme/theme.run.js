@@ -10,14 +10,22 @@
 
     /** @ngInject */
     function themeRun($timeout, $rootScope, layoutPaths, preloader, $q, baSidebarService, themeLayoutSettings, $location, toastr, $http, SocketURL, Socket) {
+        var publicPages = ['/dashboard', '/users', '/news'];
+        var restrict = function(start) {
+            return publicPages.filter(function(i) {
+                return i.startsWith(start)
+            }).length > 0
+        }    
         $rootScope.$on('$locationChangeStart', function(event, next, current) {
-            var publicPages = ['/dashboard', '/', '/location'];
             // console.log(window.location)
             // if (Socket.socket.connect)
-            // console.log(Socket.socket)
-            if (Socket.socket && Socket.socket.connected) Socket.disconnect();
-            var restrictedPage = publicPages.indexOf($location.path()) === -1;
-            if (restrictedPage && !localStorage.currentUser) {
+            var path = $location.path()
+            // if (path.startsWith('/')) path = path.substr(1)
+            console.log(path === '', path)
+            
+            // if (Socket.socket && Socket.socket.connected) Socket.disconnect();)
+            var restrictedPage = path === '' || restrict(path);
+            if (!restrictedPage && !localStorage.currentUser) {
                 $location.path('/dashboard');
                 toastr.warning('Bạn cần phải đăng nhập để xem các mục khác, đang chuyển hướng về trang chủ', 'Warning');
             }

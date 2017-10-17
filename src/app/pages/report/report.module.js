@@ -15,7 +15,8 @@
         sidebarMeta: {
           icon: 'ion-ios-paper-outline',
           order: 150,
-        }
+        },
+        role: 'user'
       })
         .state('report.date', {
           url: '/daily',

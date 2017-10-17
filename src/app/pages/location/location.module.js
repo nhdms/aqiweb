@@ -16,6 +16,7 @@
           order: 900,
           icon: 'ion-ios-location-outline'
         },
+        role: 'admin'        
       })
 
   }

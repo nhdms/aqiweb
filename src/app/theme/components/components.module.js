@@ -19,7 +19,9 @@
       $rootScope.isLogged = false;
       localStorage.removeItem('currentUser');
       localStorage.removeItem('aqi_token');
-      Socket.disconnect();
+      // Socket.disconnect();
+      $scope.$emit('reload')
+      // $rootScope.reload()      
     }
   })
 })();

@@ -155,7 +155,7 @@
         }
 
         this.getReport = function(start, end, cb) {
-            var url = this.baseURL + `/data/report?start=${start}&end=${end}`
+            var url = this.baseURL + '/data/report?start=' + start + 'end= ' + end // đcm dùng template đ' compile đc đm eslint
             $http.get(url)
             .then(function(response) {
                 cb(response.data)

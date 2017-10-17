@@ -26,7 +26,8 @@
                     toastr.success('Đăng nhập thành công!');                    
                     API.setDefaultToken(res.token);
                     $state.reload();
-                    $scope.$dismiss();                 
+                    $scope.$dismiss();
+                    $scope.$emit('reload')                 
                 } else {
                     toastr.error(res.msg, "Đăng nhập không thành công");
                 }

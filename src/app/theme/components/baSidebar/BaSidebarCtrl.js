@@ -9,8 +9,13 @@
     .controller('BaSidebarCtrl', BaSidebarCtrl);
 
   /** @ngInject */
-  function BaSidebarCtrl($scope, baSidebarService) {
-
+  function BaSidebarCtrl($scope, baSidebarService, $rootScope) {
+    $rootScope.$on('reload', function(event, message) {
+      // alert('reload')
+      $scope.menuItems = baSidebarService.getMenuItems()
+      // console.log($scope.menuItems)    
+      $scope.defaultSidebarState = $scope.menuItems[0].stateRef;    
+    });
     $scope.menuItems = baSidebarService.getMenuItems();
     $scope.defaultSidebarState = $scope.menuItems[0].stateRef;
 

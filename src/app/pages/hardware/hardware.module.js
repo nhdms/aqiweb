@@ -15,7 +15,8 @@
         sidebarMeta: {
           icon: 'ion-ios-gear-outline',
           order: 800,
-        }
+        },
+        role: 'admin'
       })
       .state('hardware.root', {
           url: '/root',
