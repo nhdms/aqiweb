@@ -222,16 +222,50 @@
       });
   }
 
-  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr , $rootScope, ngProgressFactory, SocketURL, PROGRESSBAR_COLOR) {
+  function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, $rootScope, ngProgressFactory, SocketURL, PROGRESSBAR_COLOR) {
     $scope.progressbar = ngProgressFactory.createInstance();
     $scope.progressbar.setColor(PROGRESSBAR_COLOR);
     $scope.progressbar.start();
+    var mymap = null,
+      marker = null;
+    $scope.isMapClicked = false
+
+    $scope.addMarker = function (n, t, h, p) {
+      marker.bindTooltip(' <span> <b> ' + n + ' </b> </span>  <br /> <span> <b> ' +
+        t + ' </b> °C</span> <br /> <span> <b> ' +
+        h + ' </b> %</span> <br /> <span> <b> PM2.5: ' +
+        p + '</b></span>', {
+          permanent: true,
+          direction: 'right'
+        })
+    }
+
+    $scope.initMap = function (lat, long, info) {
+      try {
+        mymap = L.map('mapid').setView([lat, long], 13);
+
+        L.tileLayer(
+          'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+              'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            id: 'mapbox.streets',
+            // renderer: L.svg()
+          }).addTo(mymap);
+        marker = L.marker([lat, long]);
+        // .bindTooltip();
+        marker.addTo(mymap);
+        $scope.addMarker(info.node, 0, 0, 0)
+      } catch (e) {}
+    }
 
     if (!$scope.socket || !$scope.socket.connected) $scope.socket = mqtt.connect(SocketURL);
     API.getInfo('locations', null, function (res) {
       if (res.success) {
         $scope.locations = res.data;
         $scope.currentLocation = $scope.locations[0];
+        // console.log($scope.currentLocation)
         $rootScope.locations = $scope.locations;
       } else {
         toastr.error(res.msg, "Lỗi");
@@ -256,8 +290,13 @@
         // $scope.currentNode = $scope.nodes[0];
         // $scope.nodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
         $scope.currentNode = $scope.nodes[0];
+        var info = Object.assign($scope.currentNode.now, {
+          node: $scope.currentNode.name
+        })
+        $scope.initMap($scope.currentNode.location.latitude, $scope.currentNode.location.longitude, info)
+        // console.log($scope.currentNode)
         $rootScope.nodes = $scope.nodes;
-        $scope.progressbar.complete();           
+        $scope.progressbar.complete();
       } else {
         toastr.error(res.msg, "Lỗi");
         $scope.progressbar.complete();
@@ -265,25 +304,25 @@
     });
 
     if (!$rootScope.safeRange) {
-      API.getSafeRange(function(res){
+      API.getSafeRange(function (res) {
         $rootScope.safeRange = res.data
       })
     }
 
-    $scope.changeLocation = function(id) {
+    $scope.changeLocation = function (id) {
       $scope.nodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
       try {
-        $scope.currentNode = $scope.nodes[0];         
-      } catch (e){
+        $scope.currentNode = $scope.nodes[0];
+      } catch (e) {
         $scope.currentNode = {};
       }
     }
-    
-    $scope.changeNode = function(){
+
+    $scope.changeNode = function () {
       console.log('g')
     }
 
-    
+
     // $timeout(() => {
     //   console.log(API.findAllInItems($scope.currentLocation._id, $scope.roots, 'locationId'));
     // }, 3000);
@@ -293,50 +332,85 @@
       var layoutColors = baConfig.colors;
 
       $scope.socket.subscribe("NODE_001");
-      
-      var humChart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({title: 'Độ ẩm', min: 40, max: 70}))),
-          tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({title: 'Nhiệt độ', min: 26, max: 32}))),
-          aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({title: 'PM2', min: 0, max: 2})));
 
-      $scope.submit = function() {
+      var humChart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'Độ ẩm',
+          min: 40,
+          max: 70
+        }))),
+        tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'Nhiệt độ',
+          min: 26,
+          max: 32
+        }))),
+        aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'PM2',
+          min: 0,
+          max: 2
+        })));
+
+      $scope.submit = function () {
         // console.log()
+        $scope.showCharts = true
         humChart.dataProvider = []
         tempChart.dataProvider = []
         aqiChart.dataProvider = []
-        $scope.socket.subscribe($scope.currentNode._id);      
+        $scope.socket.subscribe($scope.currentNode._id);
       }
-      $scope.socket.on("message", function(topic, payload) {
+      $scope.socket.on("message", function (topic, payload) {
         console.log(topic, payload.toString());
-        var str = payload.toString();
-        try {
-          var arr = str.trim().split(' '),
-              date = new Date();
+        var str = payload.toString(),
+          arr = str.trim().split(' ')
+        $scope.$apply(function () {
+          $scope.currentNode.now = {
+            temp: +arr[0],
+            hum: +arr[1],
+            pm2: +arr[2]
+          }
+          $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
+        })
 
-          if (+arr[1] > 0){
+        $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
+        try {
+          // $scope.curr
+          var date = new Date();
+
+          if (+arr[1] > 0) {
             if (humChart.dataProvider.length >= 15) {
               humChart.dataProvider.shift();
             }
-            humChart.dataProvider.push({date: date, value: +arr[1]});
+            humChart.dataProvider.push({
+              date: date,
+              value: +arr[1]
+            });
             humChart.validateData();
           }
-          if (+arr[2] > 0) {
+          if (+arr[0] > 0) {
             if (tempChart.dataProvider.length >= 15) {
               tempChart.dataProvider.shift();
             }
-            tempChart.dataProvider.push({date: date, value: +arr[2]});
+            tempChart.dataProvider.push({
+              date: date,
+              value: +arr[0]
+            });
             tempChart.validateData();
           }
 
           if (aqiChart.dataProvider.length >= 15) {
             aqiChart.dataProvider.shift();
           }
-          aqiChart.dataProvider.push({date: date, value: +arr[3]});
+          aqiChart.dataProvider.push({
+            date: date,
+            value: +arr[2]
+          });
           aqiChart.validateData();
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          console.log(e)
+        }
       });
 
-      
-      
+
+
 
       // Socket.socket.on('get_index', function (data) {
       //   console.log(data);

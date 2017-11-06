@@ -194,6 +194,40 @@
                 range: data.range
             }
         }
+
+        this.getPollutionLevel = function(aqi) {
+            if (aqi <= 50) {
+                return {
+                    status: 'Tốt',
+                    affect: 'Không ảnh hưởng đến sức khỏe',
+                    color: '#00a065'
+                }
+            } else if (aqi <= 100) {
+                return {
+                    color: '#ffe200',
+                    status: 'Trung bình',
+                    affect: 'Chất lượng không khí bình thường nhưng có thể ảnh hưởng đến sức khỏe, nhất là những người có vấn đề về đường hô hấp.'
+                }
+            } else if (aqi <= 200) {
+                return {
+                    color: '#ff9400',
+                    status: 'Tệ',
+                    affect: 'Chất lượng không khí xấu nhất là đối với những người có vấn đề hô hấp nghiêm trọng. Ở khu vực công cộng có thể bị ảnh hưởng nhẹ. Nên đeo khẩu trang khi gặp chỉ số này.'
+                }
+            } else if (aqi <= 299) {
+                return {
+                    color: '#74009f',
+                    status: 'Rất tệ',
+                    affect: 'Có thể làm cho vấn đề hô hấp trở nên xấu hơn. Đây cũng là nguyên nhân gây ra các căn bệnh về đường hô hấp, vì vậy không nên ra ngoài.'
+                }
+            } else {
+                return {
+                    color: '#8b0017',
+                    status: 'Nguy hại',
+                    affect: 'Chất lượng không khí có hại đến sức khỏe của con người.'
+                }
+            }
+        }
         return this;
     }
 
