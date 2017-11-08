@@ -2,12 +2,12 @@
  * @author v.lugovsky
  * created on 16.12.2015
  */
-(function () {
+ (function () {
   'use strict';
 
   angular.module('BlurAdmin.pages.dashboard', [])
-    .config(routeConfig)
-    .controller('DashboardController', dashboardController);
+  .config(routeConfig)
+  .controller('DashboardController', dashboardController);
 
   /** @ngInject */
   function routeConfig($stateProvider, baConfigProvider) {
@@ -211,34 +211,39 @@
     };
 
     $stateProvider
-      .state('dashboard', {
-        url: '/dashboard',
-        templateUrl: 'app/pages/dashboard/dashboard.html',
-        title: 'Trang chủ',
-        sidebarMeta: {
-          icon: 'ion-android-home',
-          order: 0,
-        },
-      });
+    .state('dashboard', {
+      url: '/dashboard',
+      templateUrl: 'app/pages/dashboard/dashboard.html',
+      title: 'Trang chủ',
+      sidebarMeta: {
+        icon: 'ion-android-home',
+        order: 0,
+      },
+    });
   }
 
   function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, $rootScope, ngProgressFactory, SocketURL, PROGRESSBAR_COLOR) {
     $scope.progressbar = ngProgressFactory.createInstance();
     $scope.progressbar.setColor(PROGRESSBAR_COLOR);
     $scope.progressbar.start();
-    var mymap = null,
-      marker = null;
+    var mymap = null
     $scope.isMapClicked = false
 
-    $scope.addMarker = function (n, t, h, p) {
-      marker.bindTooltip(' <span> <b> ' + n + ' </b> </span>  <br /> <span> <b> ' +
-        t + ' </b> °C</span> <br /> <span> <b> ' +
-        h + ' </b> %</span> <br /> <span> <b> PM2.5: ' +
-        p + '</b></span>', {
-          permanent: true,
-          direction: 'right'
-        })
+    $scope.addMarker = function (aqi, nodeId) {
+      var color = Utils.getPollutionLevel(aqi).txtColor
+      var marker = L.ExtraMarkers.icon({
+        ico: 'fa-number',
+        number: '100',
+        innerHTML: "<b style='line-height: 300%;color: #000000;'>" + aqi + "</b>",
+        markerColor: color,
+        shape: 'penta',
+        prefix: 'fa',
+        nodeId: nodeId
+      });
+      // console.log(marker)
+      return marker
     }
+
 
     $scope.initMap = function (lat, long, info) {
       try {
@@ -248,16 +253,16 @@
           'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-              'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
             id: 'mapbox.streets',
             // renderer: L.svg()
           }).addTo(mymap);
-        marker = L.marker([lat, long]);
-        // .bindTooltip();
-        marker.addTo(mymap);
-        $scope.addMarker(info.node, 0, 0, 0)
-      } catch (e) {}
+        // marker = L.marker([lat, long]);
+        // // .bindTooltip();
+        // marker.addTo(mymap);
+        
+      } catch (e) { console.warn(e)}
     }
 
     if (!$scope.socket || !$scope.socket.connected) $scope.socket = mqtt.connect(SocketURL);
@@ -297,6 +302,19 @@
         // console.log($scope.currentNode)
         $rootScope.nodes = $scope.nodes;
         $scope.progressbar.complete();
+
+        $scope.nodes.map(function(n, i) {
+          var mk = L.marker([n.location.latitude, n.location.longitude], {icon: $scope.addMarker(n.now.pm2, n._id)})
+          mk.addTo(mymap);
+          mk.bindPopup("<b>" + n._id + "</b><br>"
+            +"<b> Nhiệt độ: " + n.now.temp + "°C</b><br>"
+            +"<b> Độ ẩm: " + n.now.hum + "%</b><br>"
+            +"<b> AQI: " + n.now.pm2 + "</b>")
+          mk.on('click', function(e) {
+            // alert()
+            mk.openPopup();
+          })
+        })
       } else {
         toastr.error(res.msg, "Lỗi");
         $scope.progressbar.complete();
@@ -318,11 +336,6 @@
       }
     }
 
-    $scope.changeNode = function () {
-      console.log('g')
-    }
-
-
     // $timeout(() => {
     //   console.log(API.findAllInItems($scope.currentLocation._id, $scope.roots, 'locationId'));
     // }, 3000);
@@ -334,40 +347,48 @@
       $scope.socket.subscribe("NODE_001");
 
       var humChart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-          title: 'Độ ẩm',
-          min: 40,
-          max: 70
-        }))),
-        tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-          title: 'Nhiệt độ',
-          min: 26,
-          max: 32
-        }))),
-        aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-          title: 'PM2',
-          min: 0,
-          max: 2
-        })));
+        title: 'Độ ẩm',
+        min: 40,
+        max: 70
+      }))),
+      tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+        title: 'Nhiệt độ',
+        min: 26,
+        max: 32
+      }))),
+      aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+        title: 'AQI',
+        min: 0,
+        max: 50
+      })));
 
       $scope.submit = function () {
         // console.log()
+        // $scope.socket.
+        if ($scope.socket.connected) {
+          Object.keys($scope.socket.messageIdToTopic).map(function(i) {
+            // console.log(temp1[i][0])
+            $scope.socket.unsubscribe($scope.socket.messageIdToTopic[i][0], console.log)
+          })
+        }
         $scope.showCharts = true
         humChart.dataProvider = []
         tempChart.dataProvider = []
         aqiChart.dataProvider = []
+        console.log($scope.socket)
         $scope.socket.subscribe($scope.currentNode._id);
       }
       $scope.socket.on("message", function (topic, payload) {
         console.log(topic, payload.toString());
         var str = payload.toString(),
-          arr = str.trim().split(' ')
+        arr = str.trim().split(' ')
         $scope.$apply(function () {
           $scope.currentNode.now = {
             temp: +arr[0],
             hum: +arr[1],
             pm2: +arr[2]
           }
-          $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
+          // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
         })
 
         $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
@@ -404,6 +425,12 @@
             value: +arr[2]
           });
           aqiChart.validateData();
+          mymap.eachLayer(function (layer) { 
+            if (layer.options.icon && layer.options.icon.options.nodeId === topic) {
+              var ico = $scope.addMarker(+arr[2], topic)
+              layer.setIcon(ico)
+            }
+          });
         } catch (e) {
           console.log(e)
         }

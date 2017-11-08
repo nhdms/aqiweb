@@ -8,7 +8,7 @@
     </div>
     <div class="col-xs-6 col-sm-4">
       <div class="form-group">
-        <select class="form-control" ng-options="node as node.name for node in nodes track by node._id" ng-model="currentNode" ng-change="changeNode()">
+        <select class="form-control" ng-options="node as node.name for node in nodes track by node._id" ng-model="currentNode" ng-change="submit()">
           <option value="" disabled selected>Chọn node</option>
         </select>
       </div>
@@ -17,9 +17,9 @@
     <div class="col-xs-6 col-sm-4">
     </div>
     <div class="col-xlg-1 col-md-2 col-sm-1">
-      <button type="button" class="btn btn-info btn-icon" ng-click="submit()">
+      <!-- <button type="button" class="btn btn-info btn-icon" ng-click="submit()">
         <i class="ion-stats-bars"></i>
-      </button>
+      </button> -->
       <button type="button" class="btn btn-info btn-icon" ng-click="initMap()">
         <i class="ion-map"></i>
       </button>
@@ -74,6 +74,12 @@
   </div>
   <div ng-show="showCharts">
     <div class="row">
+      <div class="aqi-chart" ba-panel ba-panel-title="BIỂU ĐỒ CHẤT LƯỢNG KHÔNG KHÍ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+        <div id="aqi-chart" class="admin-chart"></div>
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ ĐỘ ẨM TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
         <div id="hum-chart" class="admin-chart"></div>
       </div>
@@ -82,12 +88,6 @@
     <div class="row">
       <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ NHIỆT ĐỘ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
         <div id="temp-chart" class="admin-chart"></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="aqi-chart" ba-panel ba-panel-title="BIỂU ĐỒ CHẤT LƯỢNG KHÔNG KHÍ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
-        <div id="aqi-chart" class="admin-chart"></div>
       </div>
     </div>
   </div>
