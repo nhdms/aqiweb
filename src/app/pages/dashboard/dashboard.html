@@ -2,93 +2,71 @@
   <div class="row">
     <div class="col-xs-6 col-sm-4">
       <select class="form-control" ng-options="loc as loc.name for loc in locations track by loc._id" ng-model="currentLocation"
-        ng-change="changeLocation()">
-        <option value="" disabled selected>Chọn khu vực</option>
+      ng-change="changeLocation()">
+      <option value="" disabled selected>Chọn khu vực</option>
+    </select>
+  </div>
+  <div class="col-xs-6 col-sm-4">
+    <div class="form-group">
+      <select class="form-control" ng-options="node as node.name for node in nodes track by node._id" ng-model="currentNode" ng-change="submit()">
+        <option value="" disabled selected>Chọn node</option>
       </select>
     </div>
-    <div class="col-xs-6 col-sm-4">
-      <div class="form-group">
-        <select class="form-control" ng-options="node as node.name for node in nodes track by node._id" ng-model="currentNode" ng-change="submit()">
-          <option value="" disabled selected>Chọn node</option>
-        </select>
-      </div>
-    </div>
-    <div class="clearfix visible-xs-block"></div>
-    <div class="col-xs-6 col-sm-4">
-    </div>
-    <div class="col-xlg-1 col-md-2 col-sm-1">
-      <!-- <button type="button" class="btn btn-info btn-icon" ng-click="submit()">
-        <i class="ion-stats-bars"></i>
-      </button> -->
-      <button type="button" class="btn btn-info btn-icon" ng-click="initMap()">
-        <i class="ion-map"></i>
-      </button>
-    </div>
   </div>
+  <div class="clearfix visible-xs-block"></div>
+  <div class="col-xs-6 col-sm-4">
+  </div>
+</div>
 
-  <!-- <div ng-show="!isMapClicked"> -->
-  <div class="row">
-    <div style="margin-top:10%" class="col-xs-6 col-sm-4">
-      <div id="citydivmain">
-        <div style="max-height:420px;overflow:hidden;">
-          <div class="aqiwidget-table-x" style="width:460px;">
-            <div style="text-align:left;padding:1px;padding-left:5px;padding-right:5px;line-height: 1.15;">
-              <table class="api" style="text-align:center;padding:0px;padding-top:3px;padding-bottom:8px;margin:0px;border-spacing:0px;border:0px solid black;width:100%;">
-                <tbody>
-                  <tr>
-                    <td class="aqiwgt-table-aqicell" style="padding-right:5px;">
-                      <div class="aqivalue" id="aqiwgtvalue" ng-style="{'background-color': currentNode.status.color}" style="font-size: 80px; color: rgb(0, 0, 0); text-shadow: rgb(255, 255, 255) 1px 0px 1px;"
-                        title="{{currentNode.status.affect}}">{{currentNode.now.pm2}}</div>
-                    </td>
-                    <td style="width:50%;" nowrap="true" class="aqiwgt-table-aqiinfo">
-                      <div id="aqiwgtinfo" style="font-size: 38px; text-shadow: rgb(0, 0, 0) 1px 0px 1px; color: rgb(255, 153, 51);">
-                        <span style="font-size:30px"> {{currentNode.status.status}} </span>
-                        <div style="font-size:15px;margin-top:-5px;"></div>
-                      </div>
-                      <div style="font-size:12px;"></div>
-                      <div style="font-size: 12px; padding-top: 5px; display: block;" id="aqiwgtxtrainfo">Nhiệt độ:
-                        <span class="temp" format="b">
-                          <b> {{ currentNode.now.temp }}</b>°C</span>
-                      </div>
-                      <div style="font-size: 12px; padding-top: 5px; display: block;">Độ ẩm:
-                        <span class="temp" format="b">
-                          <b> {{currentNode.now.hum}}</b> % </span>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+<div class="row">
+  <div class="col-xs-5 col-sm-3 vcenter">
+    <div class="row">
+      <div id="aqiwgtvalue col" ng-style="{'background-color': currentNode.status.color}" style="font-size: 80px; width: 70%; margin-left: 15%; color: rgb(0, 0, 0); text-shadow: rgb(255, 255, 255) 1px 0px 1px;"
+      title="{{currentNode.status.affect}}"><div style="text-align: center; line-height: 100%;">{{currentNode.now.pm2}}</div></div>
+    </div>
+    <div class="row" style="margin-left: 15%; margin-bottom: 13%; margin-top: 5%">
+      <div id="aqiwgtinfo" style="font-size: 38px; text-shadow: rgb(0, 0, 0) 1px 0px 1px; color: rgb(255, 153, 51);">
+        <span style="font-size:30px"> {{currentNode.status.status}} </span>
+      </div>
+      <div style="margin-top: inherit">
+        <div style="font-size: 12px; padding-top: 5px; display: block;" id="aqiwgtxtrainfo">Nhiệt độ:
+          <span class="temp" format="b">
+            <b> {{ currentNode.now.temp }}</b>°C</span>
+          </div>
+          <div style="font-size: 12px; padding-top: 5px; display: block;">Độ ẩm:
+            <span class="temp" format="b">
+              <b> {{currentNode.now.hum}}</b> % </span>
+            </div>
+          </div>
+          <div style="font-size: 12px; padding-top: 5px; display: block;">Trạng thái:
+            <span>
+              <b> {{currentNode.connected ? 'Đã kết nối' : 'Ngắt kết nối'}}</b></span>
             </div>
           </div>
         </div>
-        <br>
-        <div class="aqiwidget aqiwidget-xxl" style="overflow:hidden;">
-          <div class="aqiwidget-table-x" style="width:460px;"></div>
+        <div class="col-xs-9 col-sm-7 vcenter">
+          <div id="mapid" style="width: 100%; height: 400px;"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="row" style="margin-top: 50px">
+      <div class="row">
+        <div class="aqi-chart" ba-panel ba-panel-title="BIỂU ĐỒ CHẤT LƯỢNG KHÔNG KHÍ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+          <div id="aqi-chart" class="admin-chart"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ ĐỘ ẨM TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+          <div id="hum-chart" class="admin-chart"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ NHIỆT ĐỘ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
+          <div id="temp-chart" class="admin-chart"></div>
         </div>
       </div>
     </div>
-    <div class="col-xs-10 col-sm-8">
-      <div id="mapid" style="width: 100%; height: 400px;"></div>
-    </div>
-    <!-- </div> -->
-  </div>
-  <div ng-show="showCharts">
-    <div class="row">
-      <div class="aqi-chart" ba-panel ba-panel-title="BIỂU ĐỒ CHẤT LƯỢNG KHÔNG KHÍ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
-        <div id="aqi-chart" class="admin-chart"></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ ĐỘ ẨM TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
-        <div id="hum-chart" class="admin-chart"></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-12" ba-panel ba-panel-title="BIỂU ĐỒ NHIỆT ĐỘ TẠI NODE {{currentNode.name}}" ba-panel-class="with-scroll">
-        <div id="temp-chart" class="admin-chart"></div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>

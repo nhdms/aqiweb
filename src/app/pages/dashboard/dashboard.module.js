@@ -248,7 +248,6 @@
     $scope.initMap = function (lat, long, info) {
       try {
         mymap = L.map('mapid').setView([lat, long], 13);
-
         L.tileLayer(
           'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
@@ -289,12 +288,23 @@
       }
     });
 
+    $scope.generateHTML = function(n) {
+      return "<b>" + n.name + "</b><br>"
+      +"<b> Nhiệt độ: " + n.now.temp + "°C</b><br>"
+      +"<b> Độ ẩm: " + n.now.hum + "%</b><br>"
+      +"<b> AQI: " + n.now.pm2 + "</b><br>"
+      +"<b> Thời gian: " + n.now.lastUpdate + "</b><br>"
+      +"<b> Trạng thái: " + (n.connected ? 'Đã kết nối' : 'Ngắt kết nối') + "</b>"
+    }
+    
     API.getInfo('nodes', null, function (res) {
       if (res.success) {
         $scope.nodes = res.data;
         // $scope.currentNode = $scope.nodes[0];
         // $scope.nodes = API.getAllNodesByLocations($scope.currentLocation._id, $scope.roots, $scope.nodes);
         $scope.currentNode = $scope.nodes[0];
+        $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
+
         var info = Object.assign($scope.currentNode.now, {
           node: $scope.currentNode.name
         })
@@ -304,12 +314,10 @@
         $scope.progressbar.complete();
 
         $scope.nodes.map(function(n, i) {
+          $scope.nodes[i].now.lastUpdate = (new Date(n.now.lastUpdate)).toLocaleString("vi")
           var mk = L.marker([n.location.latitude, n.location.longitude], {icon: $scope.addMarker(n.now.pm2, n._id)})
           mk.addTo(mymap);
-          mk.bindPopup("<b>" + n._id + "</b><br>"
-            +"<b> Nhiệt độ: " + n.now.temp + "°C</b><br>"
-            +"<b> Độ ẩm: " + n.now.hum + "%</b><br>"
-            +"<b> AQI: " + n.now.pm2 + "</b>")
+          mk.bindPopup($scope.generateHTML(n))
           mk.on('click', function(e) {
             // alert()
             mk.openPopup();
@@ -375,23 +383,29 @@
         humChart.dataProvider = []
         tempChart.dataProvider = []
         aqiChart.dataProvider = []
-        console.log($scope.socket)
         $scope.socket.subscribe($scope.currentNode._id);
+        mymap.setView([$scope.currentNode.location.latitude, $scope.currentNode.location.longitude], 14)
+        if ($scope.currentNode)
+          $scope.currentNode.status = Utils.getPollutionLevel($scope.currentNode['now']['pm2'])
+        
       }
       $scope.socket.on("message", function (topic, payload) {
         console.log(topic, payload.toString());
         var str = payload.toString(),
         arr = str.trim().split(' ')
         $scope.$apply(function () {
-          $scope.currentNode.now = {
-            temp: +arr[0],
-            hum: +arr[1],
-            pm2: +arr[2]
+          if ($scope.currentNode) {
+            $scope.currentNode.now = {
+              temp: +arr[0],
+              hum: +arr[1],
+              pm2: +arr[2],
+              lastUpdate: (new Date()).toLocaleString("vi")
+            }
+            // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
+            $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
           }
-          // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
         })
 
-        $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
         try {
           // $scope.curr
           var date = new Date();
@@ -425,14 +439,18 @@
             value: +arr[2]
           });
           aqiChart.validateData();
-          mymap.eachLayer(function (layer) { 
-            if (layer.options.icon && layer.options.icon.options.nodeId === topic) {
-              var ico = $scope.addMarker(+arr[2], topic)
-              layer.setIcon(ico)
-            }
-          });
+          if (mymap) {
+            mymap.eachLayer(function (layer) {
+              if (layer.options.icon && layer.options.icon.options.nodeId === topic) {
+                var ico = $scope.addMarker(+arr[2], topic)
+                layer.setIcon(ico)
+
+                layer._popup.setContent($scope.generateHTML($scope.currentNode))
+              }
+            });
+          }
         } catch (e) {
-          console.log(e)
+          console.warn(e)
         }
       });
 

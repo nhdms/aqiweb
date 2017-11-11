@@ -12,7 +12,6 @@
     function Utils(baConfig, layoutPaths) {
 
         this.buildChartOptions = function (data) {
-            console.log(data.dataProvider)
             var layoutColors = baConfig.colors;
             var ret = {
                 "type": "serial",
