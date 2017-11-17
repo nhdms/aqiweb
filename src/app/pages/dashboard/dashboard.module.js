@@ -293,7 +293,7 @@
       +"<b> Nhiệt độ: " + n.now.temp + "°C</b><br>"
       +"<b> Độ ẩm: " + n.now.hum + "%</b><br>"
       +"<b> AQI: " + n.now.pm2 + "</b><br>"
-      +"<b> Thời gian: " + n.now.lastUpdate + "</b><br>"
+      +"<b> Thời gian: " + new Date(n.now.lastUpdated).toLocaleString("vi") + "</b><br>"
       +"<b> Trạng thái: " + (n.connected ? 'Đã kết nối' : 'Ngắt kết nối') + "</b>"
     }
     
