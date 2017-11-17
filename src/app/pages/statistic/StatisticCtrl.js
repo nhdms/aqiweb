@@ -2,23 +2,28 @@
  * @author v.lugovsky
  * created on 16.12.2015
  */
-(function () {
+ (function () {
     'use strict';
 
     var app = angular.module('BlurAdmin.pages.statistics')
-        .controller('StatisticCtrl', StatisticCtrl);
+    .controller('StatisticCtrl', StatisticCtrl);
 
     /** @ngInject */
     function StatisticCtrl($scope, $filter, editableOptions, editableThemes, baConfig,toastr, layoutPaths, Utils, $timeout, $rootScope,PROGRESSBAR_COLOR, API, ngProgressFactory) {
-        
         $rootScope.$on('$stateChangeStart', 
             function(event, toState, toParams, fromState, fromParams){ 
                 // do something
                 $scope.items = []
             }
-        )
+            )
         $scope.progressbar = ngProgressFactory.createInstance();
         $scope.progressbar.setColor(PROGRESSBAR_COLOR);
+        $scope.progressbar.start();
+        $scope.show = {
+            aqi: false,
+            tem: false,
+            hum: false
+        }
         if (!$rootScope.safeRange) {
             API.getSafeRange(function (res) {
                 $rootScope.safeRange = res.data
@@ -39,24 +44,34 @@
             $scope.progressbar.start();
             API.getData(obj, 2, function (err, response) {
                 // if (response.data.success)
-                console.log(response) 
+                // console.log(response) 
                 ok++;
                 if (ok === 3) $scope.progressbar.complete();                
-                if (err) return toastr.error(err, "Lỗi");                
+                if (err) return toastr.error(err, "Lỗi");   
+                // console.log(response.filter(function(i) {i.max === 0 && i.avg === 0 && i.min === 0}), response)
+                if (response.filter(function(i) { return i.max === 0 && i.avg === 0 && i.min === 0}).length === 24) {
+                    $scope.show.hum = false
+                    return toastr.success("Không có dữ liệu độ ẩm ngày này");
+                }             
                 var range = $rootScope.safeRange[2];
                 var values = response.map(function (item) {
                     item.date = new Date(new Date(item.date).setHours(item._id));
                     return item;
                 });
+                $scope.show.hum = true
                 AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Độ ẩm', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
             });
 
             API.getData(obj, 0, function (err, response) {
                 // console.log(response)
-                // if (response.data.success)
                 ok++;
+                // if (response.data.success)
                 if (ok === 3) $scope.progressbar.complete();                
                 if (err) return toastr.error(err, "Lỗi");
+                if (response.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === 24) {
+                    $scope.show.tem = false
+                    return toastr.success("Không có dữ liệu nhiệt độ ngày này");
+                }
                 var range = $rootScope.safeRange[0];
                 var values = response.map(function (item) {
                     // item.ok1 = range[0];
@@ -64,8 +79,11 @@
                     // item.ok2 = range[1];
                     return item;
                 });
+
+                // console.log(values)
                 // console.log(values[0], Utils.generateChartData(20,30)[0])
                 // var opts = 
+                $scope.show.tem = true
                 AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Nhiệt độ', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
                 // AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getTempChartOptions(values)));
 
@@ -76,7 +94,11 @@
                 // if (response.data.success)
                 ok++;
                 if (ok === 3) $scope.progressbar.complete();                
-                if (err) return toastr.error(err, "Lỗi");                
+                if (err) return toastr.error(err, "Lỗi"); 
+                if (response.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === 24) {
+                    $scope.show.aqi = false
+                    return toastr.success("Không có dữ liệu chất lượng không khí ngày này");
+                }              
                 var range = $rootScope.safeRange[1];
                 var values = response.map(function (item) {
                     // item.ok1 = range[0];
@@ -85,6 +107,7 @@
                     // item.date = new Date(item.date)
                     return item;
                 });
+                $scope.show.aqi = true
                 // AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getAqiChartOptions(values)));
                 AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Chỉ số không khí', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
             });
@@ -93,36 +116,110 @@
         }
 
         $scope.dailyStatistic = function () {
+            $scope.show = {
+                aqi: false,
+                tem: false,
+                hum: false
+            }
             $scope.progressbar.start();
-            var sensor = document.getElementById('select_sensor');
-            var type = +sensor.value || 0
+            var type = 0,
+            ok = 0
             var obj = {
                 start: $scope.datePicker.dt.getTime(),
                 end: $scope.datePicker.dt2.getTime(),
-                nodeId: document.getElementById('select_node').value,
-                type: type
-            }
+                nodeId: document.getElementById('select_node').value
+            },
+            obj0 = Object.assign({type: 0}, obj),
+            obj1 = Object.assign({type: 1}, obj),
+            obj2 = Object.assign({type: 2}, obj)
 
-            API.getMonthData(obj, function (err, data) {
-                $scope.progressbar.complete();                
-                if (err) return toastr.error(err, "Lỗi");                
+            API.getMonthData(obj0, function (err, data) {
+                // console.log(data)
+                ok++
+                if (ok === 3) $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");  
+                if (data.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === data.length) {
+                    $scope.show.tem = false
+                    return toastr.success("Không có dữ liệu nhiệt độ ngày này");
+                }                
                 data = data.map(function (i) {
                     i.date = new Date(i._id);
                     return i;
                 });
                 // console.log(data)
                 var opts = Utils.getStatisticChartOptions({
-                    title: $scope.labels[type],
+                    title: $scope.labels[0],
                     value: data,
                     range: {
-                        min: $rootScope.safeRange[type][0],
-                        max: $rootScope.safeRange[type][1]
+                        min: $rootScope.safeRange[0][0],
+                        max: $rootScope.safeRange[0][1]
                     }
                 })
 
                 opts.dataDateFormat = "YYYY-MM-DD";
                 opts.minPeriod = "DD";
-                AmCharts.makeChart('div-chart', Utils.buildChartOptions(opts));
+                $scope.show.tem = true
+                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(opts));
+            });
+
+            // obj.type = 1
+            API.getMonthData(obj1,  function (err, data) {
+                // console.log(data)
+                ok++
+                if (ok === 3) $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");  
+                if (data.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === data.length) {
+                    $scope.show.aqi = false
+                    return toastr.success("Không có dữ liệu chất lượng không khí ngày này");
+                }                
+                data = data.map(function (i) {
+                    i.date = new Date(i._id);
+                    return i;
+                });
+                // console.log(data)
+                var opts = Utils.getStatisticChartOptions({
+                    title: $scope.labels[1],
+                    value: data,
+                    range: {
+                        min: $rootScope.safeRange[1][0],
+                        max: $rootScope.safeRange[1][1]
+                    }
+                })
+
+                opts.dataDateFormat = "YYYY-MM-DD";
+                opts.minPeriod = "DD";
+                $scope.show.aqi = true
+                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(opts));
+            });
+
+            // obj.type = 2
+            API.getMonthData(obj2, function (err, data) {
+                // console.log(data)
+                ok++
+                if (ok === 3) $scope.progressbar.complete();                
+                if (err) return toastr.error(err, "Lỗi");  
+                if (data.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === data.length) {
+                    $scope.show.hum = false
+                    return toastr.success("Không có dữ liệu độ ẩm ngày này");
+                }                
+                data = data.map(function (i) {
+                    i.date = new Date(i._id);
+                    return i;
+                });
+                // console.log(data)
+                var opts = Utils.getStatisticChartOptions({
+                    title: $scope.labels[2],
+                    value: data,
+                    range: {
+                        min: $rootScope.safeRange[2][0],
+                        max: $rootScope.safeRange[2][1]
+                    }
+                })
+
+                opts.dataDateFormat = "YYYY-MM-DD";
+                opts.minPeriod = "DD";
+                $scope.show.hum = true
+                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(opts));
             });
             // var opts = (1 == type) ? Utils.getTempChartOptions()
         }
@@ -162,11 +259,11 @@
                 // console.log($scope.items)
                 // $scope.pages = createPagesArray(obj.page);
                 // if ($scope.pageLength - $scope.currentPage >= 7) {
-                var start = ($scope.pageLength - $scope.currentPage >= 7 ? $scope.currentPage : $scope.pageLength - 7);
-                var len = $scope.pageLength > 7 ? 7 : $scope.pageLength;
-                $scope.pages = Array(len).fill().map(function (x, i) {
-                    return i + start;
-                });
+                    var start = ($scope.pageLength - $scope.currentPage >= 7 ? $scope.currentPage : $scope.pageLength - 7);
+                    var len = $scope.pageLength > 7 ? 7 : $scope.pageLength;
+                    $scope.pages = Array(len).fill().map(function (x, i) {
+                        return i + start;
+                    });
                 // }
             })
         }
@@ -174,7 +271,7 @@
         // function getTable
         // DatePicker
         $scope.datePicker = {
-            dt: new Date('Fri Sep 09 2016 00:00:00 GMT+0700 (SE Asia Standard Time)'),
+            dt: new Date(),
             dt2: new Date(),
             open: open,
             open2: open2,
@@ -259,11 +356,11 @@
                 $scope.items = data;
                 // $scope.pages = createPagesArray(obj.page);
                 // if ($scope.pageLength - $scope.currentPage >= 7) {
-                var start = ($scope.pageLength - $scope.currentPage >= 7 ? $scope.currentPage : $scope.pageLength - 7);
-                var len = $scope.pageLength > 7 ? 7 : $scope.pageLength;
-                $scope.pages = Array(len).fill().map(function (x, i) {
-                    return i + start;
-                });
+                    var start = ($scope.pageLength - $scope.currentPage >= 7 ? $scope.currentPage : $scope.pageLength - 7);
+                    var len = $scope.pageLength > 7 ? 7 : $scope.pageLength;
+                    $scope.pages = Array(len).fill().map(function (x, i) {
+                        return i + start;
+                    });
                 // }
             })
         }

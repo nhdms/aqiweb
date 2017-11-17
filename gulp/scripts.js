@@ -4,6 +4,7 @@ var path = require('path');
 var gulp = require('gulp');
 var conf = require('./conf');
 var uglify = require('gulp-uglify');
+var pump = require('pump');
 var gzip = require('gulp-gzip');
 var browserSync = require('browser-sync');
 

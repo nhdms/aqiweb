@@ -1,12 +1,8 @@
-/**
- * @author v.lugovsky
- * created on 16.12.2015
- */
 (function () {
     'use strict';
 
     var app = angular.module('BlurAdmin.pages.hardware')
-        .controller('HardwareCtrl', HardwareCtrl);
+    .controller('HardwareCtrl', HardwareCtrl);
 
     /** @ngInject */
     function HardwareCtrl($scope, $filter, editableOptions, editableThemes, baConfig, layoutPaths, Utils, $timeout, ngProgressFactory,PROGRESSBAR_COLOR, API, $rootScope, toastr) {
@@ -80,8 +76,8 @@
         if (!$rootScope.safeRange) {
             API.getSafeRange(function(res){
               $rootScope.safeRange = res.data
-            })
-          }
+          })
+        }
 
         $scope.close = function(row, i) {
             row.$cancel();
@@ -94,29 +90,76 @@
                 toastr.warning("Không được bỏ trống tên " + type +"!");
             }
             if ('node' == type && !!!hw.rootId && !!$scope.currentLocation) hw.lid = $scope.currentLocation._id
-            if ('sensor' == type) hw.nodeId = document.getElementById('select_node').value
+                if ('sensor' == type) hw.nodeId = document.getElementById('select_node').value
             // console.log(hw)
-            API.save(type + 's', hw, function(res) {
-                if (!res.data.success) return toastr.error(res.data.msg);
-                toastr.success("Thêm " + type + " " + hw.name + " thành công!");
-            });
-        }
+        API.save(type + 's', hw, function(res) {
+            if (!res.data.success) return toastr.error(res.data.msg);
+            toastr.success("Thêm " + type + " " + hw.name + " thành công!");
+        });
+    }
+    $scope.isMobile = (/android|webos|iphone|ipad|ipod|blackberry|windows phone/).test(navigator.userAgent.toLowerCase());
 
-        
-        $scope.submitItem = function (node, $data, $form) {
+    $scope.detect = function(index, id, e, z) {
+        // alert(id)
+        var type = document.getElementById('device-type').value;
+
+        if ('nodes' === type && $scope.isMobile && navigator.geolocation) {
+            // e.stopPropagation()
+            // e.preventDefault()
+            var cf = !z ? confirm('Xác định location bằng GPS?') : true
+            var obj = {
+                _id: id
+            }
+            if (cf) {
+                navigator.geolocation.getCurrentPosition(function(coord) {
+                    obj.latitude = coord.coords.latitude
+                    obj.longitude = coord.coords.longitude
+                    API.update(type, obj, function (res) {
+                        if (!res.data.success) {
+                            return toastr.error(res.data.msg, "Lỗi");
+                        }
+                    }); 
+                    $scope.nodes[index].location = {
+                        latitude: obj.latitude,
+                        longitude: obj.longitude
+                    }
+                });
+            }
+        }
+    }
+
+
+    $scope.submitItem = function (node, $data, $form) {
+            // alert()
             if (!node._id) return;
             var type = document.getElementById('device-type').value;
             // console.dir(type, type.value)
             // return;            
-            var field = $form.$editables["0"].attrs.field;
-            node[field] = $data;
-            
-            API.update(type, node, function (res) {
-                if (!res.data.success) {
-                    return toastr.error(res.data.msg, "Lỗi");
-                }
-                return toastr.success("Update thành công");
-            });
+            var field = $form.$editables["0"].name;
+            // node[field] = $data;
+            // var obj 
+            if ('nodes' === type) {
+                field = $form.$editables["0"].name.split('.').slice(-1)[0]
+                var obj = {}
+                obj._id = node._id
+                obj[field] = $data
+                // node._id = node
+                API.update(type, obj, function (res) {
+                    if (!res.data.success) {
+                        return toastr.error(res.data.msg, "Lỗi");
+                    }
+
+                    return toastr.success("Update thành công");
+                });
+            } else {
+                API.update(type, node, function (res) {
+                    if (!res.data.success) {
+                        return toastr.error(res.data.msg, "Lỗi");
+                    }
+
+                    return toastr.success("Update thành công");
+                });
+            }
         }
 
         $scope.remove = function (type, id, index) {

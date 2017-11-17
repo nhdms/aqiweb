@@ -1,5 +1,12 @@
 'use strict';
 
+// console.log('1')
+var SOCKET_URL = 'http://seeyourair.com:5000',
+  API_URL = 'http://seeyourair.com:8080'
+if ('https' === window.location.protocol.slice(0, -1)) {
+  SOCKET_URL = 'wss://seeyourair.com:6443',
+  API_URL = 'https://seeyourair.com:8443'
+}
 angular.module('BlurAdmin', [
   'ngAnimate',
   'ui.bootstrap',
@@ -35,8 +42,8 @@ angular.module('BlurAdmin', [
   $translateProvider.preferredLanguage('vi');
 })
   .value('PROGRESSBAR_COLOR', '#FF0000')
-  .value('SocketURL', 'http://seeyourair.com:5000')
-  .value('APIURL', 'http://seeyourair.com:8080');
+  .value('SocketURL', SOCKET_URL)
+  .value('APIURL', API_URL);
   // .value('SocketURL', 'http://localhost:5000')
   // .value('APIURL', 'http://localhost:8080');
   

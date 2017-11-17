@@ -21,6 +21,6 @@ wrench.readdirSyncRecursive('./gulp').filter(function (file) {
  *  main optimization build task
  */
 gulp.task('default', ['clean'], function () {
-  gulp.pipe(babel())
+  gulp.pipe(babel({presets: ['babili']}))
     .start('build');
 });
