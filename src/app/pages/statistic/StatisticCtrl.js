@@ -125,8 +125,8 @@
             var type = 0,
             ok = 0
             var obj = {
-                start: $scope.datePicker.dt.getTime(),
-                end: $scope.datePicker.dt2.getTime(),
+                end: $scope.datePicker.dt.getTime(),
+                start: $scope.datePicker.dt2.getTime(),
                 nodeId: document.getElementById('select_node').value
             },
             obj0 = Object.assign({type: 0}, obj),
@@ -229,15 +229,15 @@
         $scope.tableStatistic = function (page) {
             $scope.progressbar.start();
             $scope.currentPage = page;
-            var sensor = document.getElementById('select_sensor');
-            var type = +sensor.value || 0
+            // var sensor = document.getElementById('select_sensor');
+            // var type = +sensor.value || 0
             // console.log();
             var obj = {
-                start: $scope.datePicker.dt.getTime(),
-                end: $scope.datePicker.dt2.getTime(),
+                end: $scope.datePicker.dt.getTime(),
+                start: $scope.datePicker.dt2.getTime(),
                 nodeId: document.getElementById('select_node').value,
                 // sensorId: sensor.value,
-                type: type,
+                // type: type,
                 page: page
             };
 
@@ -272,7 +272,7 @@
         // DatePicker
         $scope.datePicker = {
             dt: new Date(),
-            dt2: new Date(),
+            dt2: new Date(Date.now() - 30 * 24 * 60 * 60 * 1e3),
             open: open,
             open2: open2,
             opened: false,
@@ -326,18 +326,19 @@
         $scope.harmStatistic = function (page) {
             $scope.progressbar.start();
             $scope.currentPage = +page;
-            var sensor = document.getElementById('select_sensor');
-            var type = +sensor.value || 0;
+            // var sensor = document.getElementById('select_sensor');
+            // var type = +sensor.value || 0;
 
             // console.log();
             var obj = {
-                start: $scope.datePicker.dt.getTime(),
-                end: $scope.datePicker.dt2.getTime(),
+                end: $scope.datePicker.dt.getTime(),
+                start: $scope.datePicker.dt2.getTime(),
                 nodeId: document.getElementById('select_node').value,
                 // sensorId: sensor.value,
-                type: type,
+                // type: type,
                 page: page,
-                range: $rootScope.safeRange[type].join(',')
+                // range: 1
+                range: 1
             };
 
             // $scope.currentPage = obj.page;

@@ -7,6 +7,7 @@ var uglify = require('gulp-uglify');
 var pump = require('pump');
 var gzip = require('gulp-gzip');
 var browserSync = require('browser-sync');
+var gutil = require('gulp-util');
 
 var $ = require('gulp-load-plugins')();
 
@@ -24,7 +25,7 @@ function buildScripts() {
   return gulp.src(path.join(conf.paths.src, '/app/**/*.js'))
     .pipe($.eslint({}))
     .pipe($.eslint.format())
-    .pipe(uglify())
+    .pipe(uglify().on('error', gutil.log))
     .pipe(gzip())
     .pipe($.size())
 };
