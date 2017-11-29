@@ -19,8 +19,7 @@
                         <td></td>
                         <td>Tên </td>
                         <td> Mô tả </td>
-                        <td> Kinh độ(hiện tại)</td>
-                        <td> Vĩ độ(hiện tại)</td>
+                        <td> Vị trí(kinh độ - vĩ độ)</td>
                         <td> Hành động </td>
                     </tr>
                     <tr ng-repeat="node in nodes track by $index" class="editable-row">
@@ -29,8 +28,7 @@
                         </td>
                         <td><span editable-text="node.name" blur="cancel"> {{node.name}} </span></td>
                         <td><span editable-text="node.description" blur="cancel"> {{node.description ? node.description : 'chỉnh sửa mô tả'}} </span></td>
-                        <td ng-click="detect($index, node._id, $event)"><span editable-text="node.location.latitude"  blur="cancel"> {{node.location.latitude}} </span></td>
-                        <td ng-click="detect($index, node._id, $event)"><span editable-text="node.location.longitude"  blur="cancel"> {{node.location.longitude}} </span></td>
+                        <td ng-click="detect($index, node._id, $event)"><span editable-text="node.location"  blur="cancel"> {{node.location}} </span></td>
                         <td>
                             <form editable-form name="rowform" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == node">
                                 <button type="submit" ng-click="addHW(node, 'node', $event);" ng-disabled="rowform.$waiting" class="btn btn-primary editable-table-button btn-xs">

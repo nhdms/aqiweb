@@ -18,14 +18,14 @@
         },
         role: 'admin'
       })
-      .state('hardware.root', {
-          url: '/root',
-          templateUrl: 'app/pages/hardware/views/root.html',
-          title: 'Root',
-          sidebarMeta: {
-            order: 0,
-          },
-        })
+      // .state('hardware.root', {
+      //     url: '/root',
+      //     templateUrl: 'app/pages/hardware/views/root.html',
+      //     title: 'Root',
+      //     sidebarMeta: {
+      //       order: 0,
+      //     },
+      //   })
         .state('hardware.node', {
           url: '/node',
           templateUrl: 'app/pages/hardware/views/node.html',
@@ -34,14 +34,14 @@
             order: 0,
           },
         })
-        .state('hardware.sensor', {
-          url: '/sensor',
-          templateUrl: 'app/pages/hardware/views/sensor.html',
-          title: 'Sensor',
-          sidebarMeta: {
-            order: 0,
-          },
-        })
+        // .state('hardware.sensor', {
+        //   url: '/sensor',
+        //   templateUrl: 'app/pages/hardware/views/sensor.html',
+        //   title: 'Sensor',
+        //   sidebarMeta: {
+        //     order: 0,
+        //   },
+        // })
         
   }
 })();

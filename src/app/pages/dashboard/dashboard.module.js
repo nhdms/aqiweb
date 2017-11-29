@@ -251,9 +251,7 @@
         L.tileLayer(
           'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            attribution: '<a href="https://seeyourair.com">SYA</a>',
             id: 'mapbox.streets',
             // renderer: L.svg()
           }).addTo(mymap);
@@ -278,15 +276,15 @@
     });
 
 
-    API.getInfo('roots', null, function (res) {
-      if (res.success) {
-        $scope.roots = res.data;
-        $rootScope.roots = $scope.roots;
-      } else {
-        toastr.error(res.msg, "Lỗi");
-        $scope.progressbar.complete();
-      }
-    });
+    // API.getInfo('roots', null, function (res) {
+    //   if (res.success) {
+    //     $scope.roots = res.data;
+    //     $rootScope.roots = $scope.roots;
+    //   } else {
+    //     toastr.error(res.msg, "Lỗi");
+    //     $scope.progressbar.complete();
+    //   }
+    // });
 
     $scope.generateHTML = function(n) {
       return "<b>" + n.name + "</b><br>"
@@ -308,14 +306,14 @@
         var info = Object.assign($scope.currentNode.now, {
           node: $scope.currentNode.name
         })
-        $scope.initMap($scope.currentNode.location.latitude, $scope.currentNode.location.longitude, info)
+        $scope.initMap($scope.currentNode.current_location.latitude, $scope.currentNode.current_location.longitude, info)
         // console.log($scope.currentNode)
         $rootScope.nodes = $scope.nodes;
         $scope.progressbar.complete();
 
         $scope.nodes.map(function(n, i) {
-          $scope.nodes[i].now.lastUpdate = (new Date(n.now.lastUpdate)).toLocaleString("vi")
-          var mk = L.marker([n.location.latitude, n.location.longitude], {icon: $scope.addMarker(n.now.pm2, n._id)})
+          // $scope.nodes[i].now.lastUpdated = n.now.lastUpdated
+          var mk = L.marker([n.current_location.latitude, n.current_location.longitude], {icon: $scope.addMarker(n.now.pm2, n._id)})
           mk.addTo(mymap);
           mk.bindPopup($scope.generateHTML(n))
           mk.on('click', function(e) {
@@ -384,13 +382,13 @@
         tempChart.dataProvider = []
         aqiChart.dataProvider = []
         $scope.socket.subscribe($scope.currentNode._id);
-        mymap.setView([$scope.currentNode.location.latitude, $scope.currentNode.location.longitude], 14)
+        mymap.setView([$scope.currentNode.current_location.latitude, $scope.currentNode.current_location.longitude], 14)
         if ($scope.currentNode)
           $scope.currentNode.status = Utils.getPollutionLevel($scope.currentNode['now']['pm2'])
         
       }
       $scope.socket.on("message", function (topic, payload) {
-        console.log(topic, payload.toString());
+        // console.log(topic, payload.toString());
         var str = payload.toString(),
         arr = str.trim().split(' ')
         $scope.$apply(function () {
@@ -399,7 +397,7 @@
               temp: +arr[0],
               hum: +arr[1],
               pm2: +arr[2],
-              lastUpdate: (new Date()).toLocaleString("vi")
+              lastUpdated: Date.now()
             }
             // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
             $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])

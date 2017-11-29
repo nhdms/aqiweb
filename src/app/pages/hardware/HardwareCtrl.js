@@ -23,38 +23,20 @@
                 $scope.locations = res.data;
                 $scope.currentLocation = $scope.locations[0];
                 $rootScope.locations = $scope.locations;
-                API.getInfo('roots', null, function (res) {
-                    if (res.success && res.data.length) {
-                        // res.data.push({name: 'node độc lập'})
-                        $scope.roots = res.data;
-                        $rootScope.roots = $scope.roots;
-                        $scope.currentRoot = $scope.roots[0];
-                        API.getInfo('nodes', null, function (res) {
-                            if (res.success) {
-                                $scope.nodes = res.data;
-                                $scope.currentNode = $scope.nodes[0];
-                                $rootScope.nodes = $scope.nodes;
-                                $scope.progressbar.complete();
-                            } else {
-                                toastr.error(res.msg || "Không tìm thấy node", "Lỗi");
-                                $scope.progressbar.complete();
-                            }
-                        });
-                    } else {
-                        toastr.error(res.msg || "Không tìm thấy root", "Lỗi");
+                API.getInfo('nodes', null, function (res) {
+                    if (res.success) {
+                        $scope.nodes = res.data;
+                        $scope.currentNode = $scope.nodes[0];
+                        $rootScope.nodes = $scope.nodes;
+                        $scope.nodes.map(function(node) {
+                            node.location =  node.current_location.latitude + '-' + node.current_location.longitude
+                            return node
+                        })
                         $scope.progressbar.complete();
-                        API.getInfo('nodes', null, function (res) {
-                            if (res.success) {
-                                $scope.nodes = res.data;
-                                $scope.currentNode = $scope.nodes[0];
-                                $rootScope.nodes = $scope.nodes;
-                                $scope.progressbar.complete();
-                            } else {
-                                toastr.error(res.msg || "Không tìm thấy node", "Lỗi");
-                                $scope.progressbar.complete();
-                            }
-                        });
-                    } 
+                    } else {
+                        toastr.error(res.msg || "Không tìm thấy node", "Lỗi");
+                        $scope.progressbar.complete();
+                    }
                 });
             } else {
                 // toastr.error(res.msg || "Không tìm thấy location", "Lỗi");
@@ -63,6 +45,10 @@
                         $scope.nodes = res.data;
                         $scope.currentNode = $scope.nodes[0];
                         $rootScope.nodes = $scope.nodes;
+                        $scope.nodes.map(function(node) {
+                            node.location =  node.current_location.latitude + '-' + node.current_location.longitude
+                            return node
+                        })
                         $scope.progressbar.complete();
                     } else {
                         toastr.error(res.msg || "Không tìm thấy node", "Lỗi");
@@ -112,17 +98,20 @@
             }
             if (cf) {
                 navigator.geolocation.getCurrentPosition(function(coord) {
-                    obj.latitude = coord.coords.latitude
-                    obj.longitude = coord.coords.longitude
+                    obj.location = coord.coords.latitude + '-' + coord.coords.longitude
                     API.update(type, obj, function (res) {
                         if (!res.data.success) {
                             return toastr.error(res.data.msg, "Lỗi");
+                        } else {
+                            return toastr.success("Update node location successfully!")
                         }
                     }); 
-                    $scope.nodes[index].location = {
-                        latitude: obj.latitude,
+                    $scope.nodes[index]['current_location'] = {
+                        latitude: coord.coords.latitude,
                         longitude: obj.longitude
                     }
+
+                    $scope.nodes[index]['location'] = coord.coords.latitude + '-' + coord.coords.longitude
                 });
             }
         }

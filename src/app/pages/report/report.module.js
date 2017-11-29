@@ -16,7 +16,7 @@
           icon: 'ion-ios-paper-outline',
           order: 150,
         },
-        role: 'admin'
+        role: 'z'
       })
         .state('report.date', {
           url: '/daily',

@@ -61,7 +61,7 @@
     "babelify": "^8.0.0",
     "gulp-gzip": "^1.4.0",
     "gulp-uglifyes": "^0.1.2",
-    "pump": "^1.0.2",
+    "pump": "^1.0.3",
     "uglify-es": "github:mishoo/UglifyJS2#harmony",
     "uglify-js": "^3.1.6",
     "vinyl-buffer": "^1.0.0",

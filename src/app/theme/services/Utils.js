@@ -11,7 +11,8 @@
     /** @ngInject */
     function Utils(baConfig, layoutPaths) {
 
-        this.buildChartOptions = function (data) {
+        this.buildChartOptions = function (data, length) {
+            console.log(length)
             var layoutColors = baConfig.colors;
             var ret = {
                 "type": "serial",
@@ -57,11 +58,11 @@
                     "parseDates": true,
                 //     "dashLength": 1,
                     "autoGridCount": false,
-                    "gridCount": data.dataProvider.length,
-                //     "minorGridEnabled": true,
-                //     "gridPosition": "start",
-                //     autoWrap:false, 
-                //     minHorizontalGap:0,
+                    "gridCount": 24,
+                    "minorGridEnabled": true,
+                    "gridPosition": "start",
+                    autoWrap:false, 
+                    minHorizontalGap:0,
                     "minPeriod": data.minPeriod ? data.minPeriod : data.dataDateFormat.slice(-2).toLowerCase(),
                 },
                 "legend": {

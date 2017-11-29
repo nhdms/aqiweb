@@ -49,7 +49,7 @@
                 if (ok === 3) $scope.progressbar.complete();                
                 if (err) return toastr.error(err, "Lỗi");   
                 // console.log(response.filter(function(i) {i.max === 0 && i.avg === 0 && i.min === 0}), response)
-                if (response.filter(function(i) { return i.max === 0 && i.avg === 0 && i.min === 0}).length === 24) {
+                if (response.length === 0) {
                     $scope.show.hum = false
                     return toastr.success("Không có dữ liệu độ ẩm ngày này");
                 }             
@@ -59,7 +59,7 @@
                     return item;
                 });
                 $scope.show.hum = true
-                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Độ ẩm', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
+                AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Độ ẩm', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } }), 24))
             });
 
             API.getData(obj, 0, function (err, response) {
@@ -68,7 +68,7 @@
                 // if (response.data.success)
                 if (ok === 3) $scope.progressbar.complete();                
                 if (err) return toastr.error(err, "Lỗi");
-                if (response.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === 24) {
+                if (response.length === 0) {
                     $scope.show.tem = false
                     return toastr.success("Không có dữ liệu nhiệt độ ngày này");
                 }
@@ -84,7 +84,7 @@
                 // console.log(values[0], Utils.generateChartData(20,30)[0])
                 // var opts = 
                 $scope.show.tem = true
-                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Nhiệt độ', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
+                AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Nhiệt độ', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } }), 24))
                 // AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getTempChartOptions(values)));
 
             });
@@ -95,7 +95,7 @@
                 ok++;
                 if (ok === 3) $scope.progressbar.complete();                
                 if (err) return toastr.error(err, "Lỗi"); 
-                if (response.filter(function(i) {return i.max === 0 && i.avg === 0 && i.min === 0}).length === 24) {
+                if (response.length === 0) {
                     $scope.show.aqi = false
                     return toastr.success("Không có dữ liệu chất lượng không khí ngày này");
                 }              
@@ -109,7 +109,7 @@
                 });
                 $scope.show.aqi = true
                 // AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getAqiChartOptions(values)));
-                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Chỉ số không khí', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } })))
+                AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getStatisticChartOptions({ title: 'Chỉ số không khí', value: values.sort(function(a,b) {return a._id - b._id}), range: { min: range[0], max: range[1] } }), 24))
             });
             //    var chart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(temp));
             //             var chart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(aqi));
@@ -233,8 +233,8 @@
             // var type = +sensor.value || 0
             // console.log();
             var obj = {
-                end: $scope.datePicker.dt.getTime(),
-                start: $scope.datePicker.dt2.getTime(),
+                end: $scope.datePicker.dt.toISOString(),
+                start: $scope.datePicker.dt2.toISOString(),
                 nodeId: document.getElementById('select_node').value,
                 // sensorId: sensor.value,
                 // type: type,
@@ -254,6 +254,7 @@
                     return i;
                 });
                 $scope.items = data;
+                console.log($scope.items)
                 
 
                 // console.log($scope.items)
@@ -331,8 +332,8 @@
 
             // console.log();
             var obj = {
-                end: $scope.datePicker.dt.getTime(),
-                start: $scope.datePicker.dt2.getTime(),
+                end: $scope.datePicker.dt.toISOString(),
+                start: $scope.datePicker.dt2.toISOString(),
                 nodeId: document.getElementById('select_node').value,
                 // sensorId: sensor.value,
                 // type: type,

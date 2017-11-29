@@ -95,10 +95,10 @@
                     // console.log(response)
                     if (response.data.success){
                         var keys = response.data.data.map(function(i){ return i._id})
-                        var a = (new Array(24)).fill(1)
-                        a = a.map(function(e, i){
-                            if (keys.indexOf(i) === -1) response.data.data.push({_id: i, date: new Date(obj.date), min: 0, max:0, avg: 0})
-                        })
+                        // var a = (new Array(24)).fill(1)
+                        // a = a.map(function(e, i){
+                        //     if (keys.indexOf(i) === -1) response.data.data.push({_id: i, date: new Date(obj.date), min: 0, max:0, avg: 0})
+                        // })
                         cb(null, response.data.data)                        
                     }
                     else cb(response.data.msg);
