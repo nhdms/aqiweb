@@ -2,12 +2,12 @@
  * @author v.lugovsky
  * created on 16.12.2015
  */
- (function () {
+(function () {
   'use strict';
 
   angular.module('BlurAdmin.pages.dashboard', [])
-  .config(routeConfig)
-  .controller('DashboardController', dashboardController);
+    .config(routeConfig)
+    .controller('DashboardController', dashboardController);
 
   /** @ngInject */
   function routeConfig($stateProvider, baConfigProvider) {
@@ -211,15 +211,15 @@
     };
 
     $stateProvider
-    .state('dashboard', {
-      url: '/dashboard',
-      templateUrl: 'app/pages/dashboard/dashboard.html',
-      title: 'Trang chủ',
-      sidebarMeta: {
-        icon: 'ion-android-home',
-        order: 0,
-      },
-    });
+      .state('dashboard', {
+        url: '/dashboard',
+        templateUrl: 'app/pages/dashboard/dashboard.html',
+        title: 'Trang chủ',
+        sidebarMeta: {
+          icon: 'ion-android-home',
+          order: 0,
+        },
+      });
   }
 
   function dashboardController($scope, $timeout, baConfig, layoutPaths, Utils, API, toastr, $rootScope, ngProgressFactory, SocketURL, PROGRESSBAR_COLOR) {
@@ -258,8 +258,10 @@
         // marker = L.marker([lat, long]);
         // // .bindTooltip();
         // marker.addTo(mymap);
-        
-      } catch (e) { console.warn(e)}
+
+      } catch (e) {
+        console.warn(e)
+      }
     }
 
     if (!$scope.socket || !$scope.socket.connected) $scope.socket = mqtt.connect(SocketURL);
@@ -286,15 +288,15 @@
     //   }
     // });
 
-    $scope.generateHTML = function(n) {
-      return "<b>" + n.name + "</b><br>"
-      +"<b> Nhiệt độ: " + n.now.temp + "°C</b><br>"
-      +"<b> Độ ẩm: " + n.now.hum + "%</b><br>"
-      +"<b> AQI: " + n.now.pm2 + "</b><br>"
-      +"<b> Thời gian: " + new Date(n.now.lastUpdated).toLocaleString("vi") + "</b><br>"
-      +"<b> Trạng thái: " + (n.connected ? 'Đã kết nối' : 'Ngắt kết nối') + "</b>"
+    $scope.generateHTML = function (n) {
+      return "<b>" + n.name + "</b><br>" +
+        "<b> Nhiệt độ: " + n.now.temp + "°C</b><br>" +
+        "<b> Độ ẩm: " + n.now.hum + "%</b><br>" +
+        "<b> AQI: " + n.now.pm2 + "</b><br>" +
+        "<b> Thời gian: " + new Date(n.now.lastUpdated).toLocaleString("vi") + "</b><br>" +
+        "<b> Trạng thái: " + (n.connected ? 'Đã kết nối' : 'Ngắt kết nối') + "</b>"
     }
-    
+
     API.getInfo('nodes', null, function (res) {
       if (res.success) {
         $scope.nodes = res.data;
@@ -311,12 +313,14 @@
         $rootScope.nodes = $scope.nodes;
         $scope.progressbar.complete();
 
-        $scope.nodes.map(function(n, i) {
+        $scope.nodes.map(function (n, i) {
           // $scope.nodes[i].now.lastUpdated = n.now.lastUpdated
-          var mk = L.marker([n.current_location.latitude, n.current_location.longitude], {icon: $scope.addMarker(n.now.pm2, n._id)})
+          var mk = L.marker([n.current_location.latitude, n.current_location.longitude], {
+            icon: $scope.addMarker(n.now.pm2, n._id)
+          })
           mk.addTo(mymap);
           mk.bindPopup($scope.generateHTML(n))
-          mk.on('click', function(e) {
+          mk.on('click', function (e) {
             // alert()
             mk.openPopup();
           })
@@ -351,30 +355,33 @@
       var layoutColors = baConfig.colors;
 
       $scope.socket.subscribe("NODE_001");
+      $scope.socket.subscribe("client_connected");
 
       var humChart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-        title: 'Độ ẩm',
-        min: 40,
-        max: 70
-      }))),
-      tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-        title: 'Nhiệt độ',
-        min: 26,
-        max: 32
-      }))),
-      aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-        title: 'AQI',
-        min: 0,
-        max: 50
-      })));
+          title: 'Độ ẩm',
+          min: 40,
+          max: 70
+        }))),
+        tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'Nhiệt độ',
+          min: 26,
+          max: 32
+        }))),
+        aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'AQI',
+          min: 0,
+          max: 50
+        })));
 
       $scope.submit = function () {
         // console.log()
         // $scope.socket.
         if ($scope.socket.connected) {
-          Object.keys($scope.socket.messageIdToTopic).map(function(i) {
+          Object.keys($scope.socket.messageIdToTopic).map(function (i) {
             // console.log(temp1[i][0])
-            $scope.socket.unsubscribe($scope.socket.messageIdToTopic[i][0], console.log)
+            if ($scope.socket.messageIdToTopic[i][0] !== 'client_connected') {
+              $scope.socket.unsubscribe($scope.socket.messageIdToTopic[i][0], console.log);
+            }
           })
         }
         $scope.showCharts = true
@@ -385,85 +392,92 @@
         mymap.setView([$scope.currentNode.current_location.latitude, $scope.currentNode.current_location.longitude], 14)
         if ($scope.currentNode)
           $scope.currentNode.status = Utils.getPollutionLevel($scope.currentNode['now']['pm2'])
-        
+
       }
       $scope.socket.on("message", function (topic, payload) {
         // console.log(topic, payload.toString());
-        var str = payload.toString(),
-        arr = str.trim().split(' ')
-        $scope.$apply(function () {
-          if ($scope.currentNode) {
-            $scope.currentNode.now = {
-              temp: +arr[0],
-              hum: +arr[1],
-              pm2: +arr[2],
-              lastUpdated: Date.now()
+        var str = payload.toString()
+        if (topic === 'client_connected') {
+          // alert()
+          var clinz = JSON.parse(str)
+          console.log(clinz)
+          var index = $scope.nodes.findIndex(function (i) {
+            return i._id == clinz.id
+          })
+          // console.log(index)
+          if (index !== -1) {
+            $scope.nodes[index].connected = +clinz.status
+            if ($scope.currentNode._id === clinz.id) {
+              $scope.$apply(function () {
+                $scope.currentNode.connected = +clinz.status
+                $scope.currentNode.now.lastUpdated = Date.now()
+              })
             }
-            // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
-            $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
-          }
-        })
-
-        try {
-          // $scope.curr
-          var date = new Date();
-
-          if (+arr[1] > 0) {
-            if (humChart.dataProvider.length >= 15) {
-              humChart.dataProvider.shift();
-            }
-            humChart.dataProvider.push({
-              date: date,
-              value: +arr[1]
-            });
-            humChart.validateData();
-          }
-          if (+arr[0] > 0) {
-            if (tempChart.dataProvider.length >= 15) {
-              tempChart.dataProvider.shift();
-            }
-            tempChart.dataProvider.push({
-              date: date,
-              value: +arr[0]
-            });
-            tempChart.validateData();
           }
 
-          if (aqiChart.dataProvider.length >= 15) {
-            aqiChart.dataProvider.shift();
-          }
-          aqiChart.dataProvider.push({
-            date: date,
-            value: +arr[2]
-          });
-          aqiChart.validateData();
-          if (mymap) {
-            mymap.eachLayer(function (layer) {
-              if (layer.options.icon && layer.options.icon.options.nodeId === topic) {
-                var ico = $scope.addMarker(+arr[2], topic)
-                layer.setIcon(ico)
-
-                layer._popup.setContent($scope.generateHTML($scope.currentNode))
+        } else {
+          var arr = str.trim().split(' ')
+          $scope.$apply(function () {
+            if ($scope.currentNode) {
+              $scope.currentNode.now = {
+                temp: +arr[0],
+                hum: +arr[1],
+                pm2: +arr[2],
+                lastUpdated: Date.now()
               }
+              // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
+              $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2'])
+            }
+          })
+
+          try {
+            // $scope.curr
+            var date = new Date();
+
+            if (+arr[1] > 0) {
+              if (humChart.dataProvider.length >= 15) {
+                humChart.dataProvider.shift();
+              }
+              humChart.dataProvider.push({
+                date: date,
+                value: +arr[1]
+              });
+              humChart.validateData();
+            }
+            if (+arr[0] > 0) {
+              if (tempChart.dataProvider.length >= 15) {
+                tempChart.dataProvider.shift();
+              }
+              tempChart.dataProvider.push({
+                date: date,
+                value: +arr[0]
+              });
+              tempChart.validateData();
+            }
+
+            if (aqiChart.dataProvider.length >= 15) {
+              aqiChart.dataProvider.shift();
+            }
+            aqiChart.dataProvider.push({
+              date: date,
+              value: +arr[2]
             });
+            aqiChart.validateData();
+            if (mymap) {
+              mymap.eachLayer(function (layer) {
+                if (layer.options.icon && layer.options.icon.options.nodeId === topic) {
+                  var ico = $scope.addMarker(+arr[2], topic)
+                  layer.setIcon(ico)
+
+                  layer._popup.setContent($scope.generateHTML($scope.currentNode))
+                }
+              });
+            }
+          } catch (e) {
+            console.warn(e)
           }
-        } catch (e) {
-          console.warn(e)
         }
       });
-
-
-
-
-      // Socket.socket.on('get_index', function (data) {
-      //   console.log(data);
-      //   data.date = new Date(data.date);
-      //   if (chart.dataProvider.length >= 15) {
-      //     chart.dataProvider.shift();
-      //   }
-      //   chart.dataProvider.push(data);
-      //   chart.validateData();
-      // });
     });
   }
 })();

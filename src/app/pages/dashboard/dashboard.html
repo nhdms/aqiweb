@@ -42,6 +42,10 @@
             <span>
               <b> {{currentNode.connected ? 'Đã kết nối' : 'Ngắt kết nối'}}</b></span>
             </div>
+            <div style="font-size: 12px; padding-top: 5px; display: block;">Last update:
+            <span>
+              <b> {{currentNode.now.lastUpdated | date:'yyyy-MM-dd HH:mm:ss'}}</b></span>
+            </div>
           </div>
         </div>
         <div class="col-xs-9 col-sm-7 vcenter">

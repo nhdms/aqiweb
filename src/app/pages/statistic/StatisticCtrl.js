@@ -248,7 +248,7 @@
                 if (err) return toastr.error(err, "Lỗi");                
                 $scope.pageLength = pages;
                 data = data.map(function (i) {
-                    i.unit = (0 == i.type ? '°C' : (2 == i.type) ? '%' : '');
+                    i.unit = (0 == i.type ? '°C' : (2 == i.type) ? '%' : 'AQI');
                     var range = $rootScope.safeRange[i.type];
                     i.status = (i.value < range[0] || i.value > range[1] ? 'app/status/bad.png' : 'app/status/ok.png');
                     return i;

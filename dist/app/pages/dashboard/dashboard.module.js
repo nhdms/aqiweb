@@ -305,7 +305,9 @@
 
         $scope.nodes.map(function (n, i) {
           $scope.nodes[i].now.lastUpdate = new Date(n.now.lastUpdate).toLocaleString("vi");
-          var mk = L.marker([n.location.latitude, n.location.longitude], { icon: $scope.addMarker(n.now.pm2, n._id) });
+          var mk = L.marker([n.location.latitude, n.location.longitude], {
+            icon: $scope.addMarker(n.now.pm2, n._id)
+          });
           mk.addTo(mymap);
           mk.bindPopup($scope.generateHTML(n));
           mk.on('click', function (e) {
@@ -345,20 +347,20 @@
       $scope.socket.subscribe("NODE_001");
 
       var humChart = AmCharts.makeChart('hum-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-        title: 'Độ ẩm',
-        min: 40,
-        max: 70
-      }))),
-          tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-        title: 'Nhiệt độ',
-        min: 26,
-        max: 32
-      }))),
-          aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
-        title: 'AQI',
-        min: 0,
-        max: 50
-      })));
+          title: 'Độ ẩm',
+          min: 40,
+          max: 70
+        }))),
+        tempChart = AmCharts.makeChart('temp-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'Nhiệt độ',
+          min: 26,
+          max: 32
+        }))),
+        aqiChart = AmCharts.makeChart('aqi-chart', Utils.buildChartOptions(Utils.getRealTimeChartOptions({
+          title: 'AQI',
+          min: 0,
+          max: 50
+        })));
 
       $scope.submit = function () {
         // console.log()
@@ -366,7 +368,9 @@
         if ($scope.socket.connected) {
           Object.keys($scope.socket.messageIdToTopic).map(function (i) {
             // console.log(temp1[i][0])
-            $scope.socket.unsubscribe($scope.socket.messageIdToTopic[i][0], console.log);
+            if ($scope.socket.messageIdToTopic[i][0] !== 'client_connected') {
+              $scope.socket.unsubscribe($scope.socket.messageIdToTopic[i][0], console.log);
+            }
           });
         }
         $scope.showCharts = true;
@@ -380,7 +384,7 @@
       $scope.socket.on("message", function (topic, payload) {
         console.log(topic, payload.toString());
         var str = payload.toString(),
-            arr = str.trim().split(' ');
+          arr = str.trim().split(' ');
         $scope.$apply(function () {
           if ($scope.currentNode) {
             $scope.currentNode.now = {
@@ -389,7 +393,8 @@
               pm2: +arr[2],
               lastUpdate: new Date().toLocaleString("vi")
               // $scope.addMarker($scope.currentNode._id, +arr[0], +arr[1], +arr[2])        
-            };$scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2']);
+            };
+            $scope.currentNode.status = Utils.getPollutionLevel($scope['currentNode']['now']['pm2']);
           }
         });
 

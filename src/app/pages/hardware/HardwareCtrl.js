@@ -103,7 +103,7 @@
                         if (!res.data.success) {
                             return toastr.error(res.data.msg, "Lỗi");
                         } else {
-                            return toastr.success("Update node location successfully!")
+                            return toastr.success("Update node location successfully!163.44.192.217")
                         }
                     }); 
                     $scope.nodes[index]['current_location'] = {

@@ -12,7 +12,7 @@
     function Utils(baConfig, layoutPaths) {
 
         this.buildChartOptions = function (data, length) {
-            console.log(length)
+            // console.log(length)
             var layoutColors = baConfig.colors;
             var ret = {
                 "type": "serial",
@@ -58,7 +58,7 @@
                     "parseDates": true,
                 //     "dashLength": 1,
                     "autoGridCount": false,
-                    "gridCount": 24,
+                    "gridCount": length ? 24 : data.dataProvider.length,
                     "minorGridEnabled": true,
                     "gridPosition": "start",
                     autoWrap:false, 
