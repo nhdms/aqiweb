@@ -55,7 +55,8 @@
                 }             
                 var range = $rootScope.safeRange[2];
                 var values = response.map(function (item) {
-                    item.date = new Date(new Date(item.date).setHours(item._id));
+                    // item.date = new Date(new Date(item.date).setHours(item._id));
+                    item.date = new Date(item.date)
                     return item;
                 });
                 $scope.show.hum = true
@@ -75,8 +76,9 @@
                 var range = $rootScope.safeRange[0];
                 var values = response.map(function (item) {
                     // item.ok1 = range[0];
-                    item.date = new Date(new Date(item.date).setHours(item._id));
+                    // item.date = new Date(new Date(item.date).setHours(item._id));
                     // item.ok2 = range[1];
+                    item.date = new Date(item.date)
                     return item;
                 });
 
@@ -103,7 +105,8 @@
                 var values = response.map(function (item) {
                     // item.ok1 = range[0];
                     // item.ok2 = range[1];
-                    item.date = new Date(new Date(item.date).setHours(item._id));
+                    // item.date = new Date(new Date(item.date).setHours(item._id));
+                    item.date = new Date(item.date)
                     // item.date = new Date(item.date)
                     return item;
                 });
